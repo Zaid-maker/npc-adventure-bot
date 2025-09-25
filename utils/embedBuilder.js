@@ -11,7 +11,11 @@ const EMBED_COLORS = {
 
 function normalizeFooter(footer, commandName) {
   if (footer === undefined) {
-    return commandName ? { text: `NPC Bot • !${commandName}` } : { text: "NPC Bot" };
+    if (!commandName) {
+      return { text: "NPC Bot" };
+    }
+
+    return { text: `NPC Bot \u2022 !${commandName}` };
   }
 
   if (footer === null) {
@@ -90,4 +94,3 @@ function createCommandEmbed(commandName, options = {}) {
 }
 
 export { EMBED_COLORS, createEmbed, createCommandEmbed };
-``;
