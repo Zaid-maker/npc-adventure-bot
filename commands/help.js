@@ -26,6 +26,7 @@ export default {
           value:
             "`!balance` — Check your coin balance.\n" +
             "`!leaderboard` — View the top adventurers.\n" +
+            "`!streakboard` — View the top streaks.\n" +
             "`!trade @user <amount>` — (Coming soon) Gift coins to another adventurer.",
         },
         {
