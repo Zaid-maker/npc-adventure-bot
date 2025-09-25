@@ -2,6 +2,9 @@ import Quest from "../models/Quest.js";
 import QuestProgress from "../models/QuestProgress.js";
 import Player from "../models/Player.js";
 import QUEST_POOL from "../constants/questPool.js";
+import logger from "../utils/logger.js";
+
+const questLogger = logger.child("QuestService");
 
 function getTomorrowMidnight() {
   const date = new Date();
@@ -23,13 +26,13 @@ async function announceQuest(client, quest) {
   try {
     const channelId = process.env.QUEST_CHANNEL_ID;
     if (!channelId) {
-      console.warn("⚠️ QUEST_CHANNEL_ID is not configured. Skipping quest announcement.");
+      questLogger.warn("⚠️ QUEST_CHANNEL_ID is not configured. Skipping quest announcement.");
       return;
     }
 
     const channel = await client.channels.fetch(channelId);
     if (!channel) {
-      console.warn("⚠️ Quest channel not found. Check QUEST_CHANNEL_ID.");
+      questLogger.warn("⚠️ Quest channel not found. Check QUEST_CHANNEL_ID.");
       return;
     }
 
@@ -40,7 +43,7 @@ async function announceQuest(client, quest) {
         `⏳ Resets: ${quest.resetAt.toLocaleString()}`,
     );
   } catch (error) {
-    console.error("Failed to announce quest:", error);
+    questLogger.error("Failed to announce quest:", error);
   }
 }
 
@@ -55,7 +58,7 @@ export async function generateDailyQuest(client) {
     resetAt: getTomorrowMidnight(),
   });
 
-  console.log(`🌄 New Daily Quest: ${quest.name}`);
+  questLogger.info(`🌄 New Daily Quest: ${quest.name}`);
   await announceQuest(client, quest);
 
   return quest;

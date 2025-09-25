@@ -1,3 +1,6 @@
+import logger from "../utils/logger.js";
+
+const commandLogger = logger.child("CommandRouter");
 const commands = new Map();
 const PREFIX = "!";
 
@@ -61,7 +64,7 @@ export async function handleCommand(message) {
       commandName,
     });
   } catch (error) {
-    console.error(`Error executing command ${commandName}:`, error);
+    commandLogger.error(`Error executing command ${commandName}:`, error);
     await message.reply("⚠️ There was an error executing that command.");
   }
 

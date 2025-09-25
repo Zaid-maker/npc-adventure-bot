@@ -1,4 +1,7 @@
 import { generateDailyQuest, getMsUntilNextReset } from "./questService.js";
+import logger from "../utils/logger.js";
+
+const schedulerLogger = logger.child("Scheduler");
 
 let resetTimeout = null;
 
@@ -15,7 +18,7 @@ export function scheduleDailyReset(client) {
     try {
       await generateDailyQuest(client);
     } catch (error) {
-      console.error("Failed to generate daily quest during scheduled reset:", error);
+      schedulerLogger.error("Failed to generate daily quest during scheduled reset:", error);
     }
 
     scheduleDailyReset(client);

@@ -7,6 +7,7 @@ import Player from "./models/Player.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
 import { registerCommands, handleCommand } from "./handlers/commandRouter.js";
+import logger from "./utils/logger.js";
 
 import talkCommand from "./commands/talk.js";
 import askCommand from "./commands/ask.js";
@@ -31,7 +32,7 @@ registerCommands([
 ]);
 
 client.once("ready", async () => {
-  console.log(`🤖 NPC Bot is online as ${client.user.tag}`);
+  logger.success(`🤖 NPC Bot is online as ${client.user.tag}`);
 
   await sequelize.sync();
   await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync()]);
@@ -50,7 +51,7 @@ client.on("messageCreate", async (message) => {
   try {
     await trackQuestProgress(message);
   } catch (error) {
-    console.error("Failed to track quest progress:", error);
+    logger.error("Failed to track quest progress:", error);
   }
 
   await handleCommand(message);
