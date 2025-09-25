@@ -1,4 +1,5 @@
 import { claimQuestReward } from "../services/questService.js";
+import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "complete",
@@ -6,14 +7,27 @@ export default {
   async execute(message) {
     try {
       const { quest, bonus, streak, totalCoins } = await claimQuestReward(message.author.id);
+      const embed = createCommandEmbed("complete", {
+        color: EMBED_COLORS.success,
+        title: "🎉 Quest Complete!",
+        description: `You've claimed the reward for **${quest.name}**.`,
+        fields: [
+          { name: "Base Reward", value: `${quest.rewardCoins} coins`, inline: true },
+          { name: "Streak Bonus", value: `${bonus} coins`, inline: true },
+          { name: "🔥 Current Streak", value: `${streak} days`, inline: true },
+          { name: "💰 Total Balance", value: `${totalCoins} coins`, inline: true },
+        ],
+      });
 
-      await message.reply(
-        `🎉 Quest complete! You earned **${quest.rewardCoins} coins** + streak bonus **${bonus} coins**.\n` +
-          `🔥 Current streak: ${streak} days\n` +
-          `💰 Total balance: ${totalCoins} coins`,
-      );
+      await message.reply({ embeds: [embed] });
     } catch (error) {
-      await message.reply(error.message || "❌ Unable to claim your reward right now.");
+      const embed = createCommandEmbed("complete", {
+        color: EMBED_COLORS.warning,
+        title: "Quest Reward Unavailable",
+        description: error.message || "❌ Unable to claim your reward right now.",
+      });
+
+      await message.reply({ embeds: [embed] });
     }
   },
 };

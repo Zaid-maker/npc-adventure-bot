@@ -1,4 +1,5 @@
 import { getQuestWithProgress } from "../services/questService.js";
+import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "quest",
@@ -7,18 +8,46 @@ export default {
     const { quest, progress } = await getQuestWithProgress(message.author.id);
 
     if (!quest) {
-      await message.reply("📜 No daily quest available.");
+      const embed = createCommandEmbed("quest", {
+        color: EMBED_COLORS.neutral,
+        title: "No Daily Quest Available",
+        description: "Come back later—new challenges arise with the sun!",
+      });
+
+      await message.reply({ embeds: [embed] });
       return;
     }
 
-    const progressText = progress
-      ? `Progress: ${progress.progress} ${progress.completed ? "(✅ Completed)" : ""}`
-      : "Progress: 0";
+    const fields = [
+      {
+        name: "Reward",
+        value: `${quest.rewardCoins} coins`,
+        inline: true,
+      },
+      {
+        name: "Resets",
+        value: quest.resetAt.toLocaleString(),
+        inline: true,
+      },
+    ];
 
-    await message.reply(
-      `📜 **${quest.name}**\n${quest.description}\n\n` +
-        `Reward: ${quest.rewardCoins} coins\n${progressText}\n` +
-        `⏳ Resets: ${quest.resetAt.toLocaleString()}`,
-    );
+    if (progress) {
+      fields.push({
+        name: "Progress",
+        value: `${progress.progress}${progress.completed ? " ✅" : ""}`,
+        inline: true,
+      });
+    } else {
+      fields.push({ name: "Progress", value: "0", inline: true });
+    }
+
+    const embed = createCommandEmbed("quest", {
+      color: EMBED_COLORS.info,
+      title: quest.name,
+      description: quest.description,
+      fields,
+    });
+
+    await message.reply({ embeds: [embed] });
   },
 };

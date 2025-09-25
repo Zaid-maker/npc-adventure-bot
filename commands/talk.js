@@ -1,3 +1,5 @@
+import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
+
 const replies = [
   "Greetings, traveler. Care to browse my wares?",
   "Ah, I haven’t seen you since the last quest!",
@@ -9,6 +11,12 @@ export default {
   description: "Chat with the NPC merchant.",
   async execute(message) {
     const randomReply = replies[Math.floor(Math.random() * replies.length)];
-    await message.reply(randomReply);
+    const embed = createCommandEmbed("talk", {
+      color: EMBED_COLORS.info,
+      title: "🧺 Merchant's Greeting",
+      description: randomReply,
+    });
+
+    await message.reply({ embeds: [embed] });
   },
 };

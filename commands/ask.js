@@ -1,6 +1,6 @@
-import { EmbedBuilder } from "discord.js";
 import { DEFAULT_RESPONSES, RUMORS, TOPICS } from "../constants/askLore.js";
 import logger from "../utils/logger.js";
+import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 const askLogger = logger.child("Command:Ask");
 
@@ -17,25 +17,6 @@ function identifyTopic(question) {
   );
 }
 
-function buildEmbed({ question, authorTag, topic, insight, rumor }) {
-  const embed = new EmbedBuilder()
-    .setColor(topic?.color ?? 0x38bdf8)
-    .setTitle(topic?.title ?? "The NPC Ponders...")
-    .setDescription(
-      [`**Traveler:** ${authorTag}`, `**Inquiry:** ${question}`, "", insight].join("\n"),
-    )
-    .setFooter({ text: "Tap !ask again if curiosity lingers." });
-
-  if (rumor) {
-    embed.addFields({
-      name: "Rumor from the Tavern",
-      value: rumor,
-    });
-  }
-
-  return embed;
-}
-
 export default {
   name: "ask",
   description: "Ask the NPC a lore-filled question.",
@@ -43,7 +24,13 @@ export default {
   async execute(message, { rawArgs }) {
     const question = rawArgs?.trim();
     if (!question) {
-      await message.reply("❓ Ask me something like `!ask Where is the blacksmith?`");
+      const helpEmbed = createCommandEmbed("ask", {
+        color: EMBED_COLORS.warning,
+        title: "Curiosity needs a question!",
+        description: "Try something like `!ask Where is the blacksmith?`",
+      });
+
+      await message.reply({ embeds: [helpEmbed] });
       return;
     }
 
@@ -55,13 +42,21 @@ export default {
     askLogger.debug(`Answering question with${topic ? ` topic ${topic.id}` : " default"} insights`);
 
     try {
-      const embed = buildEmbed({
-        question,
-        authorTag: message.author.username,
-        topic,
-        insight,
-        rumor,
+      const embed = createCommandEmbed("ask", {
+        color: topic?.color ?? EMBED_COLORS.info,
+        title: topic?.title ?? "The NPC Ponders...",
+        description: [
+          `**Traveler:** ${message.author.username}`,
+          `**Inquiry:** ${question}`,
+          "",
+          insight,
+        ].join("\n"),
+        footer: "Tap !ask again if curiosity lingers.",
       });
+
+      if (rumor) {
+        embed.addFields({ name: "Rumor from the Tavern", value: rumor });
+      }
 
       await message.reply({ embeds: [embed] });
     } catch (error) {

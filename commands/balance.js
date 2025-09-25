@@ -1,4 +1,5 @@
 import Player from "../models/Player.js";
+import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "balance",
@@ -9,8 +10,19 @@ export default {
       defaults: { coins: 0, streak: 0 },
     });
 
-    await message.reply(
-      `💰 ${message.author.username}, your current balance is **${player.coins} coins**.`,
-    );
+    const embed = createCommandEmbed("balance", {
+      color: EMBED_COLORS.success,
+      title: "Coin Purse Tally",
+      description: `**${message.author.username}**, you currently hold **${player.coins} coins**.`,
+      fields: [
+        {
+          name: "Streak Bonus",
+          value: player.streak ? `+${player.streak * 5} coins per quest` : "No active streak",
+          inline: true,
+        },
+      ],
+    });
+
+    await message.reply({ embeds: [embed] });
   },
 };
