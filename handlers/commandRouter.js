@@ -2,7 +2,7 @@ import logger from "../utils/logger.js";
 
 const commandLogger = logger.child("CommandRouter");
 const commands = new Map();
-const PREFIX = "!";
+export const PREFIX = "!";
 
 function addCommand(command) {
   if (!command || !command.name || typeof command.execute !== "function") {

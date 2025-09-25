@@ -7,8 +7,9 @@ import QuestProgress from "./models/QuestProgress.js";
 import Player from "./models/Player.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
-import { registerCommands, handleCommand } from "./handlers/commandRouter.js";
+import { registerCommands, handleCommand, PREFIX } from "./handlers/commandRouter.js";
 import logger from "./utils/logger.js";
+import { createEmbed, EMBED_COLORS } from "./utils/embedBuilder.js";
 
 import talkCommand from "./commands/talk.js";
 import askCommand from "./commands/ask.js";
@@ -57,6 +58,39 @@ client.on(Events.MessageCreate, async (message) => {
     await trackQuestProgress(message);
   } catch (error) {
     logger.error("Failed to track quest progress:", error);
+  }
+
+  if (
+    client.user &&
+    message.mentions.has(client.user, {
+      ignoreEveryone: true,
+      ignoreRepliedUser: true,
+      ignoreRoles: true,
+    })
+  ) {
+    const mentionPattern = new RegExp(`<@!?${client.user.id}>`, "gi");
+    const sanitized = message.content.replace(mentionPattern, " ").toLowerCase();
+    const normalized = sanitized.replace(/\s+/g, " ").trim();
+
+    if (
+      normalized.includes("what's your prefix") ||
+      normalized.includes("whats your prefix") ||
+      normalized.includes("what is your prefix")
+    ) {
+      const embed = createEmbed(
+        {
+          color: EMBED_COLORS.info,
+          title: "Current Prefix",
+          description: `Use \`${PREFIX}\` before a command. Try \`${PREFIX}help\` to see what I can do.`,
+          footer: { text: "Mention me anytime if you forget." },
+          timestamp: false,
+        },
+        "prefix",
+      );
+
+      await message.reply({ embeds: [embed] });
+      return;
+    }
   }
 
   await handleCommand(message);
