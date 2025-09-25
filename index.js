@@ -1,3 +1,4 @@
+import { Events } from "discord.js";
 import dotenv from "dotenv";
 import client from "./config/discordClient.js";
 import sequelize from "./sequelize.js";
@@ -31,8 +32,8 @@ registerCommands([
   helpCommand,
 ]);
 
-client.once("ready", async () => {
-  logger.success(`🤖 NPC Bot is online as ${client.user.tag}`);
+client.once(Events.ClientReady, async (readyClient) => {
+  logger.success(`🤖 NPC Bot is online as ${readyClient.user.tag}`);
 
   await sequelize.sync();
   await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync()]);
@@ -45,7 +46,7 @@ client.once("ready", async () => {
   scheduleDailyReset(client);
 });
 
-client.on("messageCreate", async (message) => {
+client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
   try {
