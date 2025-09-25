@@ -29,7 +29,10 @@ export default {
         },
         {
           name: "💡 Other",
-          value: "`!ping` — Check the bot’s latency.\n" + "`!help` — Show this adventurer’s guide.",
+          value:
+            "`!ping` — Check the bot’s latency.\n" +
+            "`!stats` — View your adventurer profile.\n" +
+            "`!help` — Show this adventurer’s guide.",
         },
       ],
       footer: "✨ More features unlock as the world expands!",
