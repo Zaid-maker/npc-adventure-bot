@@ -18,6 +18,7 @@ import completeCommand from "./commands/complete.js";
 import streakCommand from "./commands/streak.js";
 import balanceCommand from "./commands/balance.js";
 import helpCommand from "./commands/help.js";
+import pingCommand from "./commands/ping.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ registerCommands([
   streakCommand,
   balanceCommand,
   helpCommand,
+  pingCommand,
 ]);
 
 client.once(Events.ClientReady, async (readyClient) => {
