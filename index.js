@@ -294,6 +294,18 @@ client.on("messageCreate", async (message) => {
         );
     }
 
+    if (message.content.toLowerCase() === "!balance") {
+        const [player] = await Player.findOrCreate({
+            where: { userId: message.author.id },
+            defaults: { coins: 0, streak: 0 },
+        });
+
+        return message.reply(
+            `💰 ${message.author.username}, your current balance is **${player.coins} coins**.`
+        );
+    }
+
+
     if (message.content.toLowerCase() === "!help") {
         return message.reply(
             "**📖 Adventurer’s Guide**\n\n" +
