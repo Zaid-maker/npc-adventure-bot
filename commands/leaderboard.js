@@ -5,9 +5,8 @@ import logger from "../utils/logger.js";
 
 const leaderboardLogger = logger.child("Command:Leaderboard");
 
-function formatLeaderboardEntry(rank, player, tier) {
-  const username = player.userId; // Assuming userId is the Discord ID; in real use, fetch username if possible
-  return `${rank}. ${username} — ${player.coins} coins ${tier.emoji}`;
+function formatLeaderboardEntry(rank, username, coins, tier) {
+  return `${rank}. ${username} — ${coins} coins ${tier.emoji}`;
 }
 
 export default {
@@ -30,10 +29,20 @@ export default {
       return;
     }
 
-    const entries = topPlayers.map((player, index) => {
-      const tier = resolveWealthTier(player.coins);
-      return formatLeaderboardEntry(index + 1, player, tier);
-    });
+    const entries = await Promise.all(
+      topPlayers.map(async (player, index) => {
+        const tier = resolveWealthTier(player.coins);
+        let username;
+        try {
+          const user = await message.client.users.fetch(player.userId);
+          username = user.username;
+        } catch (error) {
+          username = `User ${player.userId}`;
+          leaderboardLogger.warn(`Failed to fetch user ${player.userId}:`, error);
+        }
+        return formatLeaderboardEntry(index + 1, username, player.coins, tier);
+      }),
+    );
 
     leaderboardLogger.debug(`Leaderboard requested: ${entries.length} entries`);
 
