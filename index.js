@@ -293,6 +293,21 @@ client.on("messageCreate", async (message) => {
             `🔥 Your current streak is **${player.streak} days**.\n💰 Bonus per quest: +${player.streak * 5} coins`
         );
     }
+
+    if (message.content.toLowerCase() === "!help") {
+        return message.reply(
+            "**🤖 NPC Bot Commands**\n\n" +
+            "🗣️ `!talk` — Chat with the NPC.\n" +
+            "❓ `!ask <question>` — Ask the NPC something mysterious.\n" +
+            "📜 `!board` — View today’s quest board.\n" +
+            "🎯 `!quest` — Check your progress on the daily quest.\n" +
+            "✅ `!complete` — Claim your reward for completing a quest.\n" +
+            "🔥 `!streak` — See your current streak and bonus.\n" +
+            "💡 `!help` — Show this command list.\n\n" +
+            "More commands coming soon… ⚔️"
+        );
+    }
+
 });
 
 client.login(process.env.DISCORD_TOKEN);
