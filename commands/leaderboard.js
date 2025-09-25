@@ -29,6 +29,7 @@ export default {
       return;
     }
 
+    let topUser = null;
     const entries = await Promise.all(
       topPlayers.map(async (player, index) => {
         const tier = resolveWealthTier(player.coins);
@@ -36,6 +37,7 @@ export default {
         try {
           const user = await message.client.users.fetch(player.userId);
           username = user.username;
+          if (index === 0) topUser = user;
         } catch (error) {
           username = `User ${player.userId}`;
           leaderboardLogger.warn(`Failed to fetch user ${player.userId}:`, error);
@@ -50,6 +52,7 @@ export default {
       color: EMBED_COLORS.primary,
       title: "🏆 Adventurer Leaderboard",
       description: "The wealthiest adventurers in the realm:",
+      thumbnail: topUser ? topUser.displayAvatarURL({ dynamic: true, size: 128 }) : undefined,
       fields: [
         {
           name: "Top Adventurers",
