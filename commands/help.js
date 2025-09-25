@@ -25,6 +25,7 @@ export default {
           name: "💰 Economy",
           value:
             "`!balance` — Check your coin balance.\n" +
+            "`!leaderboard` — View the top adventurers.\n" +
             "`!trade @user <amount>` — (Coming soon) Gift coins to another adventurer.",
         },
         {
