@@ -2,11 +2,15 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "help",
-  description: "Show the adventurer’s guide.",
-  async execute(message) {
+  description: "Show the adventurer's guide.",
+  slashCommandData: {
+    name: "help",
+    description: "Show the adventurer's guide.",
+  },
+  async execute(messageOrInteraction) {
     const embed = createCommandEmbed("help", {
       color: EMBED_COLORS.info,
-      title: "📖 Adventurer’s Guide",
+      title: "📖 Adventurer's Guide",
       fields: [
         {
           name: "🗣️ NPC Interaction",
@@ -16,7 +20,7 @@ export default {
         {
           name: "📜 Quests",
           value:
-            "`!board` — View today’s quest board.\n" +
+            "`!board` — View today's quest board.\n" +
             "`!quest` — Check your progress on the daily quest.\n" +
             "`!complete` — Claim your reward after completing a quest.\n" +
             "`!streak` — See your current streak and bonus.",
@@ -32,15 +36,15 @@ export default {
         {
           name: "💡 Other",
           value:
-            "`!ping` — Check the bot’s latency.\n" +
+            "`!ping` — Check the bot's latency.\n" +
             "`!stats` — View your adventurer profile.\n" +
             "`!setquestchannel #channel` — Set quest announcement channel (Admin).\n" +
-            "`!help` — Show this adventurer’s guide.",
+            "`!help` — Show this adventurer's guide.",
         },
       ],
       footer: "✨ More features unlock as the world expands!",
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

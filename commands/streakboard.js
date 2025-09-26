@@ -14,15 +14,21 @@ function formatStreakboardEntry(rank, username, streak, tier) {
 export default {
   name: "streakboard",
   description: "View the top adventurers by daily quest streaks.",
-  async execute(message) {
-    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+  slashCommandData: {
+    name: "streakboard",
+    description: "View the top adventurers by daily quest streaks.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+    const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
     if (!settings || !settings.questChannelId) {
       const embed = createCommandEmbed("streakboard", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
     const topPlayers = await Player.findAll({
@@ -38,7 +44,7 @@ export default {
         description: "No adventurers have active streaks yet. Complete today's quest to start one!",
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
       return;
     }
 
@@ -48,7 +54,7 @@ export default {
         const tier = resolveStreakTier(player.streak);
         let username;
         try {
-          const user = await message.client.users.fetch(player.userId);
+          const user = await client.users.fetch(player.userId);
           username = user.username;
           if (index === 0) topUser = user;
         } catch (error) {
@@ -75,6 +81,6 @@ export default {
       timestamp: true,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

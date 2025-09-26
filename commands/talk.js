@@ -9,7 +9,11 @@ const replies = [
 export default {
   name: "talk",
   description: "Chat with the NPC merchant.",
-  async execute(message) {
+  slashCommandData: {
+    name: "talk",
+    description: "Chat with the NPC merchant.",
+  },
+  async execute(messageOrInteraction) {
     const randomReply = replies[Math.floor(Math.random() * replies.length)];
     const embed = createCommandEmbed("talk", {
       color: EMBED_COLORS.info,
@@ -17,6 +21,6 @@ export default {
       description: randomReply,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

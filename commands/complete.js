@@ -5,19 +5,27 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 export default {
   name: "complete",
   description: "Claim your reward after completing the daily quest.",
-  async execute(message) {
-    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+  slashCommandData: {
+    name: "complete",
+    description: "Claim your reward after completing the daily quest.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
     if (!settings || !settings.questChannelId) {
       const embed = createCommandEmbed("complete", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
     try {
-      const { quest, bonus, streak, totalCoins } = await claimQuestReward(message.author.id);
+      const { quest, bonus, streak, totalCoins } = await claimQuestReward(user.id);
       const embed = createCommandEmbed("complete", {
         color: EMBED_COLORS.success,
         title: "🎉 Quest Complete!",
@@ -30,7 +38,7 @@ export default {
         ],
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
     } catch (error) {
       const embed = createCommandEmbed("complete", {
         color: EMBED_COLORS.warning,
@@ -38,7 +46,7 @@ export default {
         description: error.message || "❌ Unable to claim your reward right now.",
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
     }
   },
 };

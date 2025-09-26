@@ -4,17 +4,24 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 export default {
   name: "streak",
   description: "View your current daily quest streak.",
-  async execute(message) {
-    const player = await Player.findOne({ where: { userId: message.author.id } });
+  slashCommandData: {
+    name: "streak",
+    description: "View your current daily quest streak.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+
+    const player = await Player.findOne({ where: { userId: user.id } });
 
     if (!player || player.streak === 0) {
       const embed = createCommandEmbed("streak", {
         color: EMBED_COLORS.neutral,
         title: "No Streak Yet",
-        description: "Complete today’s quest to spark your streak!",
+        description: "Complete today's quest to spark your streak!",
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
       return;
     }
 
@@ -27,6 +34,6 @@ export default {
       ],
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

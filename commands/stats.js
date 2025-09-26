@@ -44,8 +44,15 @@ function formatActiveQuest(quest, progress) {
 export default {
   name: "stats",
   description: "See your overall adventurer stats.",
-  async execute(message) {
-    const userId = message.author.id;
+  slashCommandData: {
+    name: "stats",
+    description: "See your overall adventurer stats.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+
+    const userId = user.id;
 
     const [player] = await Player.findOrCreate({
       where: { userId },
@@ -60,13 +67,13 @@ export default {
     const { quest, progress } = await getQuestWithProgress(userId);
 
     statsLogger.debug(
-      `Profile lookup for ${message.author.tag}: coins=${player.coins}, streak=${player.streak}, completed=${completedCount}, claimed=${claimedCount}`,
+      `Profile lookup for ${user.tag}: coins=${player.coins}, streak=${player.streak}, completed=${completedCount}, claimed=${claimedCount}`,
     );
 
     const embed = createCommandEmbed("stats", {
       color: EMBED_COLORS.primary,
       title: "🧭 Adventurer Profile",
-      description: `Here\'s where you stand, **${message.author.username}**.`,
+      description: `Here\'s where you stand, **${user.username}**.`,
       fields: [
         {
           name: "Coin Pouch",
@@ -101,6 +108,6 @@ export default {
       timestamp: true,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

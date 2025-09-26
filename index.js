@@ -44,10 +44,14 @@ registerCommands([
   setquestchannelCommand,
 ]);
 
-const slashCommands = listCommands().filter(cmd => cmd.slashCommandData).map(cmd => cmd.slashCommandData);
+const slashCommands = listCommands()
+  .filter((cmd) => cmd.slashCommandData)
+  .map((cmd) => cmd.slashCommandData);
 
 const slashCommandMap = new Map();
-listCommands().filter(cmd => cmd.slashCommandData).forEach(cmd => slashCommandMap.set(cmd.name, cmd));
+listCommands()
+  .filter((cmd) => cmd.slashCommandData)
+  .forEach((cmd) => slashCommandMap.set(cmd.name, cmd));
 
 client.once(Events.ClientReady, async (readyClient) => {
   logger.success(`🤖 NPC Bot is online as ${readyClient.user.tag}`);
@@ -61,7 +65,6 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 
   scheduleDailyReset(client);
-
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -135,14 +138,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
 try {
-  console.log('Started refreshing application (/) commands.');
+  console.log("Started refreshing application (/) commands.");
 
-  await rest.put(
-    Routes.applicationCommands(process.env.CLIENT_ID),
-    { body: slashCommands },
-  );
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: slashCommands });
 
-  console.log('Successfully reloaded application (/) commands.');
+  console.log("Successfully reloaded application (/) commands.");
 } catch (error) {
   console.error(error);
 }

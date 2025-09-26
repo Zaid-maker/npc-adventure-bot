@@ -5,18 +5,26 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 export default {
   name: "quest",
   description: "Check your progress on the active daily quest.",
-  async execute(message) {
-    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+  slashCommandData: {
+    name: "quest",
+    description: "Check your progress on the active daily quest.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
     if (!settings || !settings.questChannelId) {
       const embed = createCommandEmbed("quest", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
-    const { quest, progress } = await getQuestWithProgress(message.author.id);
+    const { quest, progress } = await getQuestWithProgress(user.id);
 
     if (!quest) {
       const embed = createCommandEmbed("quest", {
@@ -25,7 +33,7 @@ export default {
         description: "Come back later—new challenges arise with the sun!",
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
       return;
     }
 
@@ -59,6 +67,6 @@ export default {
       fields,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

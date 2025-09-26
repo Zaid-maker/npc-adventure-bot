@@ -5,9 +5,15 @@ import { WEALTH_TIERS, resolveWealthTier } from "../constants/wealthTiers.js";
 export default {
   name: "balance",
   description: "Check how many coins you currently hold.",
-  async execute(message) {
+  slashCommandData: {
+    name: "balance",
+    description: "Check how many coins you currently hold.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
     const [player] = await Player.findOrCreate({
-      where: { userId: message.author.id },
+      where: { userId: user.id },
       defaults: { coins: 0, streak: 0 },
     });
 
@@ -22,7 +28,7 @@ export default {
     const embed = createCommandEmbed("balance", {
       color: EMBED_COLORS.success,
       title: "Coin Purse Tally",
-      description: `**${message.author.username}**, you currently hold **${player.coins} coins**.\n${tier.emoji} Your wealth rank: **${tier.name}**.`,
+      description: `**${user.username}**, you currently hold **${player.coins} coins**.\n${tier.emoji} Your wealth rank: **${tier.name}**.`,
       fields: [
         {
           name: "Wealth Standing",
@@ -41,6 +47,6 @@ export default {
       ],
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

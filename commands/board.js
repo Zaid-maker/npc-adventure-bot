@@ -5,15 +5,22 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 export default {
   name: "board",
   description: "View the daily quest board.",
-  async execute(message) {
-    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+  slashCommandData: {
+    name: "board",
+    description: "View the daily quest board.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
     if (!settings || !settings.questChannelId) {
       const embed = createCommandEmbed("board", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
     const quest = await getActiveQuest();
@@ -24,7 +31,7 @@ export default {
         description: "Return later—fresh adventures arrive with the dawn!",
       });
 
-      await message.reply({ embeds: [emptyEmbed] });
+      await messageOrInteraction.reply({ embeds: [emptyEmbed] });
       return;
     }
 
@@ -39,6 +46,6 @@ export default {
       ],
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };

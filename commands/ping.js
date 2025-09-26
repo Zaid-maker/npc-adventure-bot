@@ -10,7 +10,14 @@ function formatMs(ms) {
 export default {
   name: "ping",
   description: "Measure the bot and API latency.",
-  async execute(message) {
+  slashCommandData: {
+    name: "ping",
+    description: "Measure the bot and API latency.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
+
     const loadingEmbed = createCommandEmbed("ping", {
       color: EMBED_COLORS.primary,
       title: "🏓 Checking latency...",
@@ -18,10 +25,14 @@ export default {
       timestamp: false,
     });
 
-    const sent = await message.reply({ embeds: [loadingEmbed], fetchReply: true });
+    const sent = await messageOrInteraction.reply({ embeds: [loadingEmbed], fetchReply: true });
 
-    const roundTrip = sent.createdTimestamp - message.createdTimestamp;
-    const apiPing = message.client.ws.ping;
+    const roundTrip =
+      sent.createdTimestamp -
+      (isInteraction
+        ? messageOrInteraction.createdTimestamp
+        : messageOrInteraction.createdTimestamp);
+    const apiPing = client.ws.ping;
 
     pingLogger.debug(`Round-trip ${roundTrip} ms | API ${apiPing} ms`);
 

@@ -13,15 +13,23 @@ function formatLeaderboardEntry(rank, username, coins, tier) {
 export default {
   name: "leaderboard",
   description: "View the top adventurers by coin balance.",
-  async execute(message) {
-    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+  slashCommandData: {
+    name: "leaderboard",
+    description: "View the top adventurers by coin balance.",
+  },
+  async execute(messageOrInteraction) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+    const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
+
+    const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
     if (!settings || !settings.questChannelId) {
       const embed = createCommandEmbed("leaderboard", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
     const topPlayers = await Player.findAll({
@@ -36,7 +44,7 @@ export default {
         description: "No adventurers have earned coins yet. Be the first!",
       });
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
       return;
     }
 
@@ -46,7 +54,7 @@ export default {
         const tier = resolveWealthTier(player.coins);
         let username;
         try {
-          const user = await message.client.users.fetch(player.userId);
+          const user = await client.users.fetch(player.userId);
           username = user.username;
           if (index === 0) topUser = user;
         } catch (error) {
@@ -73,6 +81,6 @@ export default {
       timestamp: true,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };
