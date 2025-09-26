@@ -1,4 +1,5 @@
 import Player from "../models/Player.js";
+import { Op } from "sequelize";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import { resolveStreakTier } from "../constants/streakTiers.js";
 import logger from "../utils/logger.js";
@@ -14,7 +15,7 @@ export default {
   description: "View the top adventurers by daily quest streaks.",
   async execute(message) {
     const topPlayers = await Player.findAll({
-      where: { streak: { [Player.sequelize.Op.gt]: 0 } },
+      where: { streak: { [Op.gt]: 0 } },
       order: [["streak", "DESC"]],
       limit: 10,
     });
