@@ -34,6 +34,7 @@ export default {
           value:
             "`!ping` — Check the bot’s latency.\n" +
             "`!stats` — View your adventurer profile.\n" +
+            "`!setquestchannel #channel` — Set quest announcement channel (Admin).\n" +
             "`!help` — Show this adventurer’s guide.",
         },
       ],

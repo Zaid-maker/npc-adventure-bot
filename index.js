@@ -24,6 +24,7 @@ import pingCommand from "./commands/ping.js";
 import statsCommand from "./commands/stats.js";
 import leaderboardCommand from "./commands/leaderboard.js";
 import streakboardCommand from "./commands/streakboard.js";
+import setquestchannelCommand from "./commands/setquestchannel.js";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ registerCommands([
   statsCommand,
   leaderboardCommand,
   streakboardCommand,
+  setquestchannelCommand,
 ]);
 
 client.once(Events.ClientReady, async (readyClient) => {

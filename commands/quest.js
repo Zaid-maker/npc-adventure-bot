@@ -1,10 +1,21 @@
 import { getQuestWithProgress } from "../services/questService.js";
+import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "quest",
   description: "Check your progress on the active daily quest.",
   async execute(message) {
+    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+    if (!settings || !settings.questChannelId) {
+      const embed = createCommandEmbed("quest", {
+        color: EMBED_COLORS.warning,
+        title: "Setup Required",
+        description: "Please set up a quest channel first using `!setquestchannel #channel`.",
+      });
+      return message.reply({ embeds: [embed] });
+    }
+
     const { quest, progress } = await getQuestWithProgress(message.author.id);
 
     if (!quest) {

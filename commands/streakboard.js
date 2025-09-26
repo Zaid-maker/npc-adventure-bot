@@ -1,5 +1,6 @@
 import Player from "../models/Player.js";
 import { Op } from "sequelize";
+import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import { resolveStreakTier } from "../constants/streakTiers.js";
 import logger from "../utils/logger.js";
@@ -14,6 +15,16 @@ export default {
   name: "streakboard",
   description: "View the top adventurers by daily quest streaks.",
   async execute(message) {
+    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+    if (!settings || !settings.questChannelId) {
+      const embed = createCommandEmbed("streakboard", {
+        color: EMBED_COLORS.warning,
+        title: "Setup Required",
+        description: "Please set up a quest channel first using `!setquestchannel #channel`.",
+      });
+      return message.reply({ embeds: [embed] });
+    }
+
     const topPlayers = await Player.findAll({
       where: { streak: { [Op.gt]: 0 } },
       order: [["streak", "DESC"]],

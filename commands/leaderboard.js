@@ -1,4 +1,5 @@
 import Player from "../models/Player.js";
+import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import { resolveWealthTier } from "../constants/wealthTiers.js";
 import logger from "../utils/logger.js";
@@ -13,6 +14,16 @@ export default {
   name: "leaderboard",
   description: "View the top adventurers by coin balance.",
   async execute(message) {
+    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+    if (!settings || !settings.questChannelId) {
+      const embed = createCommandEmbed("leaderboard", {
+        color: EMBED_COLORS.warning,
+        title: "Setup Required",
+        description: "Please set up a quest channel first using `!setquestchannel #channel`.",
+      });
+      return message.reply({ embeds: [embed] });
+    }
+
     const topPlayers = await Player.findAll({
       order: [["coins", "DESC"]],
       limit: 10,

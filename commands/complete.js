@@ -1,10 +1,21 @@
 import { claimQuestReward } from "../services/questService.js";
+import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "complete",
   description: "Claim your reward after completing the daily quest.",
   async execute(message) {
+    const settings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+    if (!settings || !settings.questChannelId) {
+      const embed = createCommandEmbed("complete", {
+        color: EMBED_COLORS.warning,
+        title: "Setup Required",
+        description: "Please set up a quest channel first using `!setquestchannel #channel`.",
+      });
+      return message.reply({ embeds: [embed] });
+    }
+
     try {
       const { quest, bonus, streak, totalCoins } = await claimQuestReward(message.author.id);
       const embed = createCommandEmbed("complete", {
