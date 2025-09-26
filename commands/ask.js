@@ -21,8 +21,24 @@ export default {
   name: "ask",
   description: "Ask the NPC a lore-filled question.",
   usage: "!ask <question>",
-  async execute(message, { rawArgs }) {
-    const question = rawArgs?.trim();
+  slashCommandData: {
+    name: "ask",
+    description: "Ask the NPC a lore-filled question.",
+    options: [
+      {
+        name: "question",
+        description: "Your question for the NPC",
+        type: 3, // STRING
+        required: true,
+      },
+    ],
+  },
+  async execute(messageOrInteraction, { rawArgs } = {}) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+    const question = isInteraction
+      ? messageOrInteraction.options.getString("question")
+      : rawArgs?.trim();
     if (!question) {
       const helpEmbed = createCommandEmbed("ask", {
         color: EMBED_COLORS.warning,
@@ -30,7 +46,7 @@ export default {
         description: "Try something like `!ask Where is the blacksmith?`",
       });
 
-      await message.reply({ embeds: [helpEmbed] });
+      await messageOrInteraction.reply({ embeds: [helpEmbed] });
       return;
     }
 
@@ -46,7 +62,7 @@ export default {
         color: topic?.color ?? EMBED_COLORS.info,
         title: topic?.title ?? "The NPC Ponders...",
         description: [
-          `**Traveler:** ${message.author.username}`,
+          `**Traveler:** ${user.username}`,
           `**Inquiry:** ${question}`,
           "",
           insight,
@@ -58,11 +74,11 @@ export default {
         embed.addFields({ name: "Rumor from the Tavern", value: rumor });
       }
 
-      await message.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
     } catch (error) {
       askLogger.error("Failed to send ask embed:", error);
       const fallback = [
-        `**Traveler:** ${message.author.username}`,
+        `**Traveler:** ${user.username}`,
         `**Inquiry:** ${question}`,
         "",
         insight,
@@ -70,7 +86,7 @@ export default {
       ]
         .filter(Boolean)
         .join("\n");
-      await message.reply(fallback);
+      await messageOrInteraction.reply(fallback);
     }
   },
 };

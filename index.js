@@ -1,4 +1,4 @@
-import { Events } from "discord.js";
+import { Events, SlashCommandBuilder, REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 import client from "./config/discordClient.js";
 import sequelize from "./sequelize.js";
@@ -8,7 +8,7 @@ import Player from "./models/Player.js";
 import GuildSettings from "./models/GuildSettings.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
-import { registerCommands, handleCommand, PREFIX } from "./handlers/commandRouter.js";
+import { registerCommands, handleCommand, listCommands, PREFIX } from "./handlers/commandRouter.js";
 import logger from "./utils/logger.js";
 import { createEmbed, EMBED_COLORS } from "./utils/embedBuilder.js";
 
@@ -44,6 +44,11 @@ registerCommands([
   setquestchannelCommand,
 ]);
 
+const slashCommands = listCommands().filter(cmd => cmd.slashCommandData).map(cmd => cmd.slashCommandData);
+
+const slashCommandMap = new Map();
+listCommands().filter(cmd => cmd.slashCommandData).forEach(cmd => slashCommandMap.set(cmd.name, cmd));
+
 client.once(Events.ClientReady, async (readyClient) => {
   logger.success(`🤖 NPC Bot is online as ${readyClient.user.tag}`);
 
@@ -56,6 +61,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 
   scheduleDailyReset(client);
+
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -102,5 +108,43 @@ client.on(Events.MessageCreate, async (message) => {
 
   await handleCommand(message);
 });
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const command = slashCommandMap.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    logger.error("Error executing slash command:", error);
+    const reply = {
+      content: "There was an error while executing this command!",
+      ephemeral: true,
+    };
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(reply);
+    } else {
+      await interaction.reply(reply);
+    }
+  }
+});
+
+const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+
+try {
+  console.log('Started refreshing application (/) commands.');
+
+  await rest.put(
+    Routes.applicationCommands(process.env.CLIENT_ID),
+    { body: slashCommands },
+  );
+
+  console.log('Successfully reloaded application (/) commands.');
+} catch (error) {
+  console.error(error);
+}
 
 client.login(process.env.DISCORD_TOKEN);

@@ -7,17 +7,36 @@ const setQuestChannelLogger = logger.child("Command:SetQuestChannel");
 export default {
   name: "setquestchannel",
   description: "Set the channel for daily quest announcements (Admin only).",
-  async execute(message, { args }) {
-    if (!message.member.permissions.has("ManageChannels")) {
+  slashCommandData: {
+    name: "setquestchannel",
+    description: "Set the channel for daily quest announcements (Admin only).",
+    options: [
+      {
+        name: "channel",
+        description: "The channel for quest announcements",
+        type: 7, // CHANNEL
+        required: true,
+      },
+    ],
+  },
+  async execute(messageOrInteraction, { args } = {}) {
+    const isInteraction = messageOrInteraction.isChatInputCommand;
+    const member = isInteraction ? messageOrInteraction.member : messageOrInteraction.member;
+    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+
+    if (!member.permissions.has("ManageChannels")) {
       const embed = createCommandEmbed("setquestchannel", {
         color: EMBED_COLORS.danger,
         title: "Permission Denied",
         description: "You need `Manage Channels` permission to set the quest channel.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
-    const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[0]);
+    const channel = isInteraction
+      ? messageOrInteraction.options.getChannel("channel")
+      : messageOrInteraction.mentions.channels.first() ||
+        messageOrInteraction.guild.channels.cache.get(args[0]);
     if (!channel) {
       const embed = createCommandEmbed("setquestchannel", {
         color: EMBED_COLORS.warning,
@@ -25,7 +44,7 @@ export default {
         description:
           "Please mention a channel or provide its ID.\nExample: `!setquestchannel #quests`",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
     if (channel.type !== 0) {
@@ -35,20 +54,20 @@ export default {
         title: "Invalid Channel Type",
         description: "Please select a text channel.",
       });
-      return message.reply({ embeds: [embed] });
+      return messageOrInteraction.reply({ embeds: [embed] });
     }
 
-    const existingSettings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+    const existingSettings = await GuildSettings.findOne({ where: { guildId: guild.id } });
 
     await GuildSettings.upsert({
-      guildId: message.guild.id,
+      guildId: guild.id,
       questChannelId: channel.id,
     });
 
     const action = existingSettings ? "updated" : "set";
 
     setQuestChannelLogger.info(
-      `Quest channel ${action} to ${channel.name} (${channel.id}) in guild ${message.guild.name}`,
+      `Quest channel ${action} to ${channel.name} (${channel.id}) in guild ${guild.name}`,
     );
 
     const embed = createCommandEmbed("setquestchannel", {
@@ -57,6 +76,6 @@ export default {
       description: `Daily quests will now be announced in ${channel}.`,
     });
 
-    await message.reply({ embeds: [embed] });
+    await messageOrInteraction.reply({ embeds: [embed] });
   },
 };
