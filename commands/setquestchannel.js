@@ -38,18 +38,22 @@ export default {
       return message.reply({ embeds: [embed] });
     }
 
+    const existingSettings = await GuildSettings.findOne({ where: { guildId: message.guild.id } });
+
     await GuildSettings.upsert({
       guildId: message.guild.id,
       questChannelId: channel.id,
     });
 
+    const action = existingSettings ? "updated" : "set";
+
     setQuestChannelLogger.info(
-      `Quest channel set to ${channel.name} (${channel.id}) in guild ${message.guild.name}`,
+      `Quest channel ${action} to ${channel.name} (${channel.id}) in guild ${message.guild.name}`,
     );
 
     const embed = createCommandEmbed("setquestchannel", {
       color: EMBED_COLORS.success,
-      title: "Quest Channel Set",
+      title: `Quest Channel ${action.charAt(0).toUpperCase() + action.slice(1)}`,
       description: `Daily quests will now be announced in ${channel}.`,
     });
 
