@@ -1,6 +1,7 @@
 import Quest from "../models/Quest.js";
 import QuestProgress from "../models/QuestProgress.js";
 import Player from "../models/Player.js";
+import GuildSettings from "../models/GuildSettings.js";
 import QUEST_POOL from "../constants/questPool.js";
 import logger from "../utils/logger.js";
 
@@ -23,27 +24,28 @@ export function getMsUntilNextReset() {
 async function announceQuest(client, quest) {
   if (!client) return;
 
-  try {
-    const channelId = process.env.QUEST_CHANNEL_ID;
-    if (!channelId) {
-      questLogger.warn("⚠️ QUEST_CHANNEL_ID is not configured. Skipping quest announcement.");
-      return;
+  for (const guild of client.guilds.cache.values()) {
+    let settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
+    if (!settings || !settings.questChannelId) {
+      // Fallback to env if no setting
+      const fallbackChannelId = process.env.QUEST_CHANNEL_ID;
+      if (!fallbackChannelId) continue;
+      settings = { questChannelId: fallbackChannelId };
     }
 
-    const channel = await client.channels.fetch(channelId);
-    if (!channel) {
-      questLogger.warn("⚠️ Quest channel not found. Check QUEST_CHANNEL_ID.");
-      return;
-    }
+    try {
+      const channel = await client.channels.fetch(settings.questChannelId);
+      if (!channel) continue;
 
-    await channel.send(
-      "📜 **New Daily Quest Appears!**\n\n" +
-        `**${quest.name}**\n${quest.description}\n\n` +
-        `Reward: ${quest.rewardCoins} coins\n` +
-        `⏳ Resets: ${quest.resetAt.toLocaleString()}`,
-    );
-  } catch (error) {
-    questLogger.error("Failed to announce quest:", error);
+      await channel.send(
+        "📜 **New Daily Quest Appears!**\n\n" +
+          `**${quest.name}**\n${quest.description}\n\n` +
+          `Reward: ${quest.rewardCoins} coins\n` +
+          `⏳ Resets: ${quest.resetAt.toLocaleString()}`,
+      );
+    } catch (error) {
+      questLogger.error(`Failed to announce quest in guild ${guild.id}:`, error);
+    }
   }
 }
 

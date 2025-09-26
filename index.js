@@ -5,6 +5,7 @@ import sequelize from "./sequelize.js";
 import Quest from "./models/Quest.js";
 import QuestProgress from "./models/QuestProgress.js";
 import Player from "./models/Player.js";
+import GuildSettings from "./models/GuildSettings.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
 import { registerCommands, handleCommand, PREFIX } from "./handlers/commandRouter.js";
@@ -45,7 +46,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   logger.success(`🤖 NPC Bot is online as ${readyClient.user.tag}`);
 
   await sequelize.sync();
-  await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync()]);
+  await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync(), GuildSettings.sync()]);
 
   const quest = await getActiveQuest();
   if (!quest || new Date() >= quest.resetAt) {
