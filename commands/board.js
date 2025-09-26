@@ -22,8 +22,9 @@ export default {
       title: "📜 Quest Board",
       description: `**${quest.name}**\n${quest.description}`,
       fields: [
-        { name: "Reward", value: `${quest.rewardCoins} coins`, inline: true },
-        { name: "Resets", value: quest.resetAt.toLocaleString(), inline: true },
+        { name: "Base Reward", value: `${quest.rewardCoins} coins`, inline: true },
+        { name: "Streak Bonus", value: "Up to +5 coins per day of streak", inline: true },
+        { name: "Resets", value: quest.resetAt.toLocaleString(), inline: false },
       ],
     });
 
