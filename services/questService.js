@@ -148,7 +148,25 @@ export async function trackQuestProgress(message) {
     (quest.name === "Ask a Question" && progress.progress >= 1) ||
     (quest.name === "Check the Quest Board" && progress.progress >= 1);
 
-  if (completed && !progress.completed) {
+  // Check state-based quests that don't require progress tracking
+  let stateCompleted = false;
+  if (quest.name === "Earn 30 Coins") {
+    const [player] = await Player.findOrCreate({
+      where: { userId: message.author.id },
+      defaults: { coins: 0, streak: 0 },
+    });
+    stateCompleted = player.coins >= 30;
+  } else if (quest.name === "Generous Spirit") {
+    // TODO: Implement trade tracking - for now, this quest cannot be completed
+    stateCompleted = false;
+  } else if (quest.name === "Quest Veteran") {
+    // TODO: Track daily quest completions - for now, this quest cannot be completed
+    stateCompleted = false;
+  }
+
+  const isCompleted = completed || stateCompleted;
+
+  if (isCompleted && !progress.completed) {
     progress.completed = true;
     updated = true;
   }
