@@ -25,7 +25,8 @@ export default {
       timestamp: false,
     });
 
-    const sent = await messageOrInteraction.reply({ embeds: [loadingEmbed], fetchReply: true });
+    const response = await messageOrInteraction.reply({ embeds: [loadingEmbed], withResponse: true });
+    const sent = response.resource.message;
 
     const roundTrip =
       sent.createdTimestamp -
