@@ -4,6 +4,7 @@ import Player from "../models/Player.js";
 import GuildSettings from "../models/GuildSettings.js";
 import QUEST_POOL from "../constants/questPool.js";
 import logger from "../utils/logger.js";
+import { createEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 const questLogger = logger.child("QuestService");
 
@@ -37,12 +38,32 @@ async function announceQuest(client, quest) {
       const channel = await client.channels.fetch(settings.questChannelId);
       if (!channel) continue;
 
-      await channel.send(
-        "📜 **New Daily Quest Appears!**\n\n" +
-          `**${quest.name}**\n${quest.description}\n\n` +
-          `Reward: ${quest.rewardCoins} coins\n` +
-          `⏳ Resets: ${quest.resetAt.toLocaleString()}`,
-      );
+      const embed = createEmbed({
+        color: EMBED_COLORS.info,
+        title: "📜 New Daily Quest Appears!",
+        description: `**${quest.name}**\n${quest.description}`,
+        fields: [
+          {
+            name: "💰 Reward",
+            value: `${quest.rewardCoins} coins`,
+            inline: true,
+          },
+          {
+            name: "⏳ Resets",
+            value: quest.resetAt.toLocaleString(),
+            inline: true,
+          },
+          {
+            name: "🔥 Streak Bonus",
+            value: "Up to +5 coins per day of streak",
+            inline: true,
+          },
+        ],
+        footer: { text: "Complete this quest to earn rewards! Use !quest to check progress." },
+        timestamp: true,
+      });
+
+      await channel.send({ embeds: [embed] });
     } catch (error) {
       questLogger.error(`Failed to announce quest in guild ${guild.id}:`, error);
     }
