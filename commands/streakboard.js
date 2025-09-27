@@ -22,14 +22,6 @@ export default {
     const isInteraction = messageOrInteraction.isChatInputCommand;
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
-    if (!settings || !settings.questChannelId) {
-      const embed = createCommandEmbed("streakboard", {
-        color: EMBED_COLORS.warning,
-        title: "Setup Required",
-        description: "Please set up a quest channel first using `!setquestchannel #channel`.",
-      });
-      return messageOrInteraction.reply({ embeds: [embed] });
-    }
 
     const topPlayers = await Player.findAll({
       where: { streak: { [Op.gt]: 0 } },

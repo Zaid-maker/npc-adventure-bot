@@ -1,4 +1,4 @@
-import { Events, SlashCommandBuilder, REST, Routes } from "discord.js";
+import { Events, SlashCommandBuilder, REST, Routes, MessageFlags } from "discord.js";
 import dotenv from "dotenv";
 import client from "./config/discordClient.js";
 import sequelize from "./sequelize.js";
@@ -125,7 +125,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     logger.error("Error executing slash command:", error);
     const reply = {
       content: "There was an error while executing this command!",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     };
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp(reply);
