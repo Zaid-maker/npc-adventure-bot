@@ -25,7 +25,10 @@ export default {
       timestamp: false,
     });
 
-    const response = await messageOrInteraction.reply({ embeds: [loadingEmbed], withResponse: true });
+    const response = await messageOrInteraction.reply({
+      embeds: [loadingEmbed],
+      withResponse: true,
+    });
     const sent = response.resource.message;
 
     const roundTrip =
