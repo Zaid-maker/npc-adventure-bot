@@ -64,6 +64,29 @@ client.once(Events.ClientReady, async (readyClient) => {
     await generateDailyQuest(client);
   }
 
+  // Set bot activity with rotation
+  const activities = [
+    { name: "adventurers on their quests! 🗡️", type: 3 }, // Watching
+    { name: "Bot is in alpha stage ⚠️", type: 0 }, // Playing
+  ];
+
+  let currentActivityIndex = 0;
+
+  const updateActivity = () => {
+    client.user.setPresence({
+      activities: [activities[currentActivityIndex]],
+      status: "online",
+    });
+
+    currentActivityIndex = (currentActivityIndex + 1) % activities.length;
+  };
+
+  // Set initial activity
+  updateActivity();
+
+  // Rotate activities every 30 seconds
+  setInterval(updateActivity, 30000);
+
   scheduleDailyReset(client);
 });
 
