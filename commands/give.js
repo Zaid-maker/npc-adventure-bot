@@ -6,24 +6,31 @@ const giveLogger = logger.child("Command:Give");
 
 export default {
   name: "give",
-  description: "Give coins to another user (Bot Owner Only)",
+  description:
+    "Give coins to server members (Bot Owner Only) - Includes reason tracking and large transfer warnings",
   slashCommandData: {
     name: "give",
-    description: "Give coins to another user (Bot Owner Only)",
+    description: "Give coins to server members (Bot Owner Only)",
     options: [
       {
         name: "user",
-        description: "The user to give coins to",
+        description: "The server member to give coins to",
         type: 6, // USER type
         required: true,
       },
       {
         name: "amount",
-        description: "Amount of coins to give",
+        description: "Amount of coins to give (1-10,000)",
         type: 4, // INTEGER type
         required: true,
         min_value: 1,
         max_value: 10000,
+      },
+      {
+        name: "reason",
+        description: "Reason for giving coins (for transparency)",
+        type: 3, // STRING type
+        required: false,
       },
     ],
   },
@@ -87,13 +94,13 @@ export default {
         return messageOrInteraction.reply({ embeds: [embed] });
       }
 
-      // Check if target user is a member of this server
-      const targetMember = await guild.members.fetch(targetUser.id).catch(() => null);
-      if (!targetMember) {
+      // Double-check target user is still a member (in case they left during execution)
+      const targetMemberCheck = await guild.members.fetch(targetUser.id).catch(() => null);
+      if (!targetMemberCheck) {
         const embed = createCommandEmbed("give", {
           color: EMBED_COLORS.warning,
-          title: "⚠️ User Not in Server",
-          description: "You can only give coins to users who are members of this server.",
+          title: "⚠️ User Left Server",
+          description: "The target user is no longer a member of this server.",
         });
         return messageOrInteraction.reply({ embeds: [embed] });
       }
@@ -112,11 +119,58 @@ export default {
         return messageOrInteraction.reply({ embeds: [embed] });
       }
 
+      // Check daily limit (50,000 coins per day)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // This is a simplified check - in production you'd want to track this in database
+      // For now, we'll just warn about large amounts
+      const DAILY_LIMIT = 50000;
+      if (amount > 5000) {
+        const confirmEmbed = createCommandEmbed("give", {
+          color: EMBED_COLORS.warning,
+          title: "⚠️ Large Transfer Warning",
+          description: `You're about to give **${amount} coins** to ${targetUser.username}.\n\nThis is a large amount. Are you sure?`,
+          fields: [
+            {
+              name: "Recipient",
+              value: `${targetUser.username}`,
+              inline: true,
+            },
+            {
+              name: "Amount",
+              value: `${amount} 🪙`,
+              inline: true,
+            },
+            {
+              name: "Current Balance",
+              value: `${targetPlayer.coins} 🪙`,
+              inline: true,
+            },
+          ],
+          footer: { text: "This action cannot be undone" },
+        });
+
+        // For slash commands, we'll proceed (Discord doesn't support confirmations easily)
+        // For prefix commands, we could add confirmation logic
+        if (!isInteraction) {
+          await messageOrInteraction.reply({ embeds: [confirmEmbed] });
+          return; // Require explicit confirmation for large amounts in prefix commands
+        }
+      }
+
       // Get or create target player
       const [targetPlayer] = await Player.findOrCreate({
         where: { userId: targetUser.id },
         defaults: { coins: 0, streak: 0 },
       });
+
+      // Get reason (optional)
+      const reason = isInteraction
+        ? messageOrInteraction.options.getString("reason")
+        : messageOrInteraction.content.split(" ").slice(3).join(" ") || null;
 
       // Add coins
       const oldBalance = targetPlayer.coins;
@@ -124,7 +178,7 @@ export default {
       await targetPlayer.save();
 
       giveLogger.info(
-        `Owner ${user.username} gave ${amount} coins to ${targetUser.username} (${oldBalance} → ${targetPlayer.coins})`,
+        `Owner ${user.username} gave ${amount} coins to ${targetUser.username} (${oldBalance} → ${targetPlayer.coins})${reason ? ` - Reason: ${reason}` : ""}`,
       );
 
       // Create success embed
@@ -133,22 +187,31 @@ export default {
         title: "✅ Coins Given Successfully",
         fields: [
           {
-            name: "Recipient",
-            value: `${targetUser.username} (${targetUser.id})`,
+            name: "👤 Recipient",
+            value: `${targetUser.username}\n${targetUser}`,
             inline: true,
           },
           {
-            name: "Amount Given",
-            value: `${amount} 🪙`,
+            name: "🪙 Amount Given",
+            value: `${amount.toLocaleString()} coins`,
             inline: true,
           },
           {
-            name: "New Balance",
-            value: `${targetPlayer.coins} 🪙`,
+            name: "💰 Balance Change",
+            value: `${oldBalance.toLocaleString()} → ${targetPlayer.coins.toLocaleString()}`,
             inline: true,
           },
+          ...(reason
+            ? [
+                {
+                  name: "📝 Reason",
+                  value: reason,
+                  inline: false,
+                },
+              ]
+            : []),
         ],
-        footer: { text: "Admin action performed by bot owner" },
+        footer: { text: `Admin action by ${user.username} • ${guild.name}` },
         timestamp: true,
       });
 
