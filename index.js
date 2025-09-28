@@ -26,6 +26,7 @@ import leaderboardCommand from "./commands/leaderboard.js";
 import streakboardCommand from "./commands/streakboard.js";
 import setquestchannelCommand from "./commands/setquestchannel.js";
 import historyCommand from "./commands/history.js";
+import giveCommand from "./commands/give.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ registerCommands([
   streakboardCommand,
   setquestchannelCommand,
   historyCommand,
+  giveCommand,
 ]);
 
 const slashCommands = listCommands()
