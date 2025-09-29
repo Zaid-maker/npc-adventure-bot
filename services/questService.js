@@ -38,7 +38,7 @@ const QUEST_PATTERNS = {
   // State-based quests (checked separately)
   state: (quest) => {
     return ["Earn 30 Coins", "Generous Spirit", "Quest Veteran"].includes(quest.name);
-  }
+  },
 };
 
 function getQuestRequirement(quest) {
@@ -170,7 +170,10 @@ export async function trackQuestProgress(message) {
   if (requirement.type === "message" && QUEST_PATTERNS.message(quest, content)) {
     progress.progress += 1;
     updated = true;
-  } else if (requirement.type === "command" && QUEST_PATTERNS.command(quest, message.content.toLowerCase())) {
+  } else if (
+    requirement.type === "command" &&
+    QUEST_PATTERNS.command(quest, message.content.toLowerCase())
+  ) {
     progress.progress += 1;
     updated = true;
   }
@@ -201,7 +204,9 @@ export async function trackQuestProgress(message) {
       const rewardResult = await autoClaimQuestReward(message.author.id);
       if (rewardResult) {
         await sendQuestCompletionNotification(message, quest, rewardResult);
-        questLogger.info(`🎉 Auto-completed quest "${quest.name}" for user ${message.author.username}`);
+        questLogger.info(
+          `🎉 Auto-completed quest "${quest.name}" for user ${message.author.username}`,
+        );
       }
     } catch (error) {
       questLogger.error(`Failed to auto-claim reward for quest "${quest.name}":`, error);
@@ -223,7 +228,7 @@ async function sendQuestCompletionNotification(message, quest, rewardResult) {
     fields: [
       {
         name: "💰 Reward Earned",
-        value: `${rewardResult.bonus > 0 ? rewardResult.quest.rewardCoins + rewardResult.bonus : rewardResult.quest.rewardCoins} coins${rewardResult.bonus > 0 ? ` (+${rewardResult.bonus} streak bonus)` : ''}`,
+        value: `${rewardResult.bonus > 0 ? rewardResult.quest.rewardCoins + rewardResult.bonus : rewardResult.quest.rewardCoins} coins${rewardResult.bonus > 0 ? ` (+${rewardResult.bonus} streak bonus)` : ""}`,
         inline: true,
       },
       {

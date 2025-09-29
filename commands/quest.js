@@ -4,10 +4,12 @@ import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
   name: "quest",
-  description: "Check your progress on the active daily quest (auto-completes when requirements met).",
+  description:
+    "Check your progress on the active daily quest (auto-completes when requirements met).",
   slashCommandData: {
     name: "quest",
-    description: "Check your progress on the active daily quest (auto-completes when requirements met).",
+    description:
+      "Check your progress on the active daily quest (auto-completes when requirements met).",
   },
   async execute(messageOrInteraction) {
     const isInteraction = messageOrInteraction.isChatInputCommand;
@@ -63,7 +65,9 @@ export default {
       } else {
         progressText = `${currentProgress}/${targetCount}`;
         if (requirement.type === "message") {
-          progressText += requirement.keyword ? ` - Say "${requirement.keyword}" in chat` : " - Send messages in chat";
+          progressText += requirement.keyword
+            ? ` - Say "${requirement.keyword}" in chat`
+            : " - Send messages in chat";
         } else if (requirement.type === "command") {
           progressText += ` - Use \`${requirement.command}\``;
         } else if (requirement.type === "state") {
