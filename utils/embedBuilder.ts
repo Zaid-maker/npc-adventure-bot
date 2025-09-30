@@ -28,7 +28,7 @@ interface EmbedOptions {
 
 function normalizeFooter(
   footer: EmbedFooterOptions | string | null | undefined,
-  commandName?: string
+  commandName?: string,
 ): EmbedFooterOptions | null {
   if (footer === undefined) {
     if (!commandName) {
@@ -46,7 +46,7 @@ function normalizeFooter(
 }
 
 function normalizeAuthor(
-  author: EmbedAuthorOptions | string | null | undefined
+  author: EmbedAuthorOptions | string | null | undefined,
 ): EmbedAuthorOptions | null {
   if (!author) {
     return null;
@@ -61,7 +61,7 @@ function addFields(
     name: string;
     value: string;
     inline?: boolean;
-  }> = []
+  }> = [],
 ): void {
   const filtered = fields.filter((field) => field && field.name && field.value);
   if (filtered.length) {

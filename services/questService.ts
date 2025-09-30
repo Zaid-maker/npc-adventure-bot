@@ -221,7 +221,11 @@ export async function trackQuestProgress(message: Message): Promise<any> {
   return { quest, progress };
 }
 
-async function sendQuestCompletionNotification(message: Message, quest: any, rewardResult: any): Promise<void> {
+async function sendQuestCompletionNotification(
+  message: Message,
+  quest: any,
+  rewardResult: any,
+): Promise<void> {
   const embed = createEmbed({
     color: EMBED_COLORS.success,
     title: "🎉 Quest Completed!",
