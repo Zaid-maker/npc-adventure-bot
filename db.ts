@@ -1,4 +1,4 @@
-// db.js
+// db.ts
 import { Sequelize, DataTypes } from "sequelize";
 
 const sequelize = new Sequelize({
