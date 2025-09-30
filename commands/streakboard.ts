@@ -27,7 +27,6 @@ export default {
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
 
     const topPlayers = await Player.findAll({
