@@ -50,8 +50,11 @@ export default {
     description: "See your overall adventurer stats.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
 
     const userId = user.id;
 

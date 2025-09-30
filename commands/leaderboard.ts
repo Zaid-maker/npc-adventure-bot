@@ -7,7 +7,12 @@ import logger from "../utils/logger.js";
 
 const leaderboardLogger = logger.child("Command:Leaderboard");
 
-function formatLeaderboardEntry(rank: number, username: string, coins: number, tier: { emoji: string }): string {
+function formatLeaderboardEntry(
+  rank: number,
+  username: string,
+  coins: number,
+  tier: { emoji: string },
+): string {
   return `${rank}. ${username} — ${coins} coins ${tier.emoji}`;
 }
 
@@ -19,7 +24,8 @@ export default {
     description: "View the top adventurers by coin balance.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
 
@@ -53,7 +59,7 @@ export default {
 
     let topUser: User | null = null;
     const entries: string[] = [];
-    
+
     for (let index = 0; index < topPlayers.length; index++) {
       const player = topPlayers[index];
       const playerData = player as any;

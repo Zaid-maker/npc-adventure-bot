@@ -229,8 +229,8 @@ export async function autoClaimQuestReward(userId: string): Promise<void> {
     // Update streak
     const now = new Date();
     const lastCompleted = playerData.lastCompletedAt;
-    const isConsecutive = lastCompleted &&
-      (now.getTime() - lastCompleted.getTime()) < 48 * 60 * 60 * 1000; // 48 hours
+    const isConsecutive =
+      lastCompleted && now.getTime() - lastCompleted.getTime() < 48 * 60 * 60 * 1000; // 48 hours
 
     if (isConsecutive) {
       playerData.streak += 1;
@@ -242,13 +242,17 @@ export async function autoClaimQuestReward(userId: string): Promise<void> {
     await player.save();
     await progress.save();
 
-    questLogger.info(`Auto-claimed ${totalReward} coins for user ${userId} (streak: ${playerData.streak})`);
+    questLogger.info(
+      `Auto-claimed ${totalReward} coins for user ${userId} (streak: ${playerData.streak})`,
+    );
   } catch (error) {
     questLogger.error(`Failed to auto-claim reward for user ${userId}:`, error);
   }
 }
 
-export async function claimQuestReward(userId: string): Promise<{ quest: any; bonus: number; streak: number; totalCoins: number }> {
+export async function claimQuestReward(
+  userId: string,
+): Promise<{ quest: any; bonus: number; streak: number; totalCoins: number }> {
   const { quest, progress } = await getQuestWithProgress(userId);
   if (!quest || !progress) {
     throw new Error("No active quest found.");
@@ -279,8 +283,8 @@ export async function claimQuestReward(userId: string): Promise<{ quest: any; bo
   // Update streak
   const now = new Date();
   const lastCompleted = playerData.lastCompletedAt;
-  const isConsecutive = lastCompleted &&
-    (now.getTime() - lastCompleted.getTime()) < 48 * 60 * 60 * 1000; // 48 hours
+  const isConsecutive =
+    lastCompleted && now.getTime() - lastCompleted.getTime() < 48 * 60 * 60 * 1000; // 48 hours
 
   if (isConsecutive) {
     playerData.streak += 1;
@@ -292,7 +296,9 @@ export async function claimQuestReward(userId: string): Promise<{ quest: any; bo
   await player.save();
   await progress.save();
 
-  questLogger.info(`User ${userId} claimed ${totalReward} coins (base: ${baseReward}, bonus: ${streakBonus})`);
+  questLogger.info(
+    `User ${userId} claimed ${totalReward} coins (base: ${baseReward}, bonus: ${streakBonus})`,
+  );
 
   return {
     quest,

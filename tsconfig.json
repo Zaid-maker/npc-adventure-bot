@@ -26,13 +26,6 @@
     "noEmitOnError": true,
     "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "data"
-  ]
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["node_modules", "dist", "data"]
 }

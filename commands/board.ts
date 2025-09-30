@@ -11,8 +11,11 @@ export default {
     description: "View the daily quest board.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const guild: Guild | null = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).guild : (messageOrInteraction as Message).guild;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const guild: Guild | null = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).guild
+      : (messageOrInteraction as Message).guild;
 
     if (!guild) {
       const embed = createCommandEmbed("board", {

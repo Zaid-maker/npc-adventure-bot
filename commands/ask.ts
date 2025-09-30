@@ -41,9 +41,15 @@ export default {
       },
     ],
   },
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, { rawArgs }: CommandExecuteOptions = {}): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    { rawArgs }: CommandExecuteOptions = {},
+  ): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const question = isInteraction
       ? (messageOrInteraction as ChatInputCommandInteraction).options.getString("question")
       : rawArgs?.trim();

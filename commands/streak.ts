@@ -10,8 +10,11 @@ export default {
     description: "View your current daily quest streak.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
 
     const player = await Player.findOne({ where: { userId: user.id } });
 

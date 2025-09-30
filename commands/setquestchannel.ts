@@ -24,9 +24,15 @@ export default {
       },
     ],
   },
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, { args }: CommandExecuteOptions = {}): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const member: GuildMember = isInteraction ? messageOrInteraction.member as GuildMember : messageOrInteraction.member as GuildMember;
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    { args }: CommandExecuteOptions = {},
+  ): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const member: GuildMember = isInteraction
+      ? (messageOrInteraction.member as GuildMember)
+      : (messageOrInteraction.member as GuildMember);
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
 
     if (!member.permissions.has("ManageChannels")) {

@@ -165,7 +165,11 @@ const TITLES: Title[] = [
   },
 ];
 
-function getPlayerStats(player: any, totalCompletedQuests: number, todayCompletedQuests: number): PlayerStats {
+function getPlayerStats(
+  player: any,
+  totalCompletedQuests: number,
+  todayCompletedQuests: number,
+): PlayerStats {
   return {
     totalQuests: totalCompletedQuests,
     totalCoins: player.coins,
@@ -215,8 +219,11 @@ export default {
     description: "View your quest history, achievements, and titles.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
 
     try {

@@ -13,9 +13,14 @@ export default {
       "Check your progress on the active daily quest (auto-completes when requirements met).",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
-    const guild: Guild | null = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).guild : (messageOrInteraction as Message).guild;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
+    const guild: Guild | null = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).guild
+      : (messageOrInteraction as Message).guild;
 
     if (!guild) {
       const embed = createCommandEmbed("quest", {

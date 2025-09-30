@@ -16,7 +16,8 @@ export default {
     description: "Measure the bot and API latency.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
     const client = messageOrInteraction.client;
 
     const loadingEmbed = createCommandEmbed("ping", {
@@ -38,9 +39,7 @@ export default {
       sent = response as unknown as Message;
     }
 
-    const roundTrip =
-      sent.createdTimestamp -
-      messageOrInteraction.createdTimestamp;
+    const roundTrip = sent.createdTimestamp - messageOrInteraction.createdTimestamp;
     const apiPing = client.ws.ping;
 
     pingLogger.debug(`Round-trip ${roundTrip} ms | API ${apiPing} ms`);

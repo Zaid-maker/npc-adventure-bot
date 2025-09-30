@@ -8,7 +8,12 @@ import logger from "../utils/logger.js";
 
 const streakboardLogger = logger.child("Command:Streakboard");
 
-function formatStreakboardEntry(rank: number, username: string, streak: number, tier: { emoji: string }): string {
+function formatStreakboardEntry(
+  rank: number,
+  username: string,
+  streak: number,
+  tier: { emoji: string },
+): string {
   return `${rank}. ${username} — ${streak} day${streak === 1 ? "" : "s"} ${tier.emoji}`;
 }
 
@@ -20,7 +25,8 @@ export default {
     description: "View the top adventurers by daily quest streaks.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
 

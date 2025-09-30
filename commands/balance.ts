@@ -11,8 +11,11 @@ export default {
     description: "Check how many coins you currently hold.",
   },
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
-    const isInteraction = (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
-    const user: User = isInteraction ? (messageOrInteraction as ChatInputCommandInteraction).user : (messageOrInteraction as Message).author;
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const [player] = await Player.findOrCreate({
       where: { userId: user.id },
       defaults: { coins: 0, streak: 0 },
@@ -39,7 +42,9 @@ export default {
         },
         {
           name: "Streak Bonus",
-          value: playerData.streak ? `+${playerData.streak * 5} coins per quest` : "No active streak",
+          value: playerData.streak
+            ? `+${playerData.streak * 5} coins per quest`
+            : "No active streak",
           inline: true,
         },
         {
