@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, type EmbedFooterOptions, type EmbedAuthorOptions } from "discord.js";
 
 const EMBED_COLORS = {
   primary: 0x38bdf8,
@@ -7,15 +7,35 @@ const EMBED_COLORS = {
   warning: 0xf97316,
   danger: 0xef4444,
   neutral: 0x64748b,
-};
+} as const;
 
-function normalizeFooter(footer, commandName) {
+interface EmbedOptions {
+  title?: string;
+  description?: string;
+  color?: number;
+  fields?: Array<{
+    name: string;
+    value: string;
+    inline?: boolean;
+  }>;
+  footer?: EmbedFooterOptions | string | null;
+  author?: EmbedAuthorOptions | string | null;
+  thumbnail?: string | undefined;
+  image?: string;
+  url?: string;
+  timestamp?: Date | boolean | null;
+}
+
+function normalizeFooter(
+  footer: EmbedFooterOptions | string | null | undefined,
+  commandName?: string,
+): EmbedFooterOptions | null {
   if (footer === undefined) {
     if (!commandName) {
       return { text: "NPC Bot" };
     }
 
-    return { text: `NPC Bot \u2022 !${commandName}` };
+    return { text: `NPC Bot • !${commandName}` };
   }
 
   if (footer === null) {
@@ -25,7 +45,9 @@ function normalizeFooter(footer, commandName) {
   return typeof footer === "string" ? { text: footer } : footer;
 }
 
-function normalizeAuthor(author) {
+function normalizeAuthor(
+  author: EmbedAuthorOptions | string | null | undefined,
+): EmbedAuthorOptions | null {
   if (!author) {
     return null;
   }
@@ -33,14 +55,21 @@ function normalizeAuthor(author) {
   return typeof author === "string" ? { name: author } : author;
 }
 
-function addFields(embed, fields = []) {
+function addFields(
+  embed: EmbedBuilder,
+  fields: Array<{
+    name: string;
+    value: string;
+    inline?: boolean;
+  }> = [],
+): void {
   const filtered = fields.filter((field) => field && field.name && field.value);
   if (filtered.length) {
     embed.addFields(filtered);
   }
 }
 
-function resolveTimestamp(timestamp) {
+function resolveTimestamp(timestamp: Date | boolean | null | undefined): Date | null {
   if (timestamp === false) {
     return null;
   }
@@ -52,7 +81,7 @@ function resolveTimestamp(timestamp) {
   return timestamp;
 }
 
-function createEmbed(options = {}, commandName) {
+function createEmbed(options: EmbedOptions = {}, commandName?: string): EmbedBuilder {
   const {
     title,
     description,
@@ -89,8 +118,9 @@ function createEmbed(options = {}, commandName) {
   return embed;
 }
 
-function createCommandEmbed(commandName, options = {}) {
+function createCommandEmbed(commandName: string, options: EmbedOptions = {}): EmbedBuilder {
   return createEmbed(options, commandName);
 }
 
 export { EMBED_COLORS, createEmbed, createCommandEmbed };
+export type { EmbedOptions };

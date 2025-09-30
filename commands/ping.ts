@@ -1,9 +1,10 @@
+import { type Message, type ChatInputCommandInteraction } from "discord.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import logger from "../utils/logger.js";
 
 const pingLogger = logger.child("Command:Ping");
 
-function formatMs(ms) {
+function formatMs(ms: number): string {
   return `${ms.toFixed(0)} ms`;
 }
 
@@ -14,9 +15,10 @@ export default {
     name: "ping",
     description: "Measure the bot and API latency.",
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const client = messageOrInteraction.client;
 
     const loadingEmbed = createCommandEmbed("ping", {
       color: EMBED_COLORS.primary,
@@ -29,13 +31,15 @@ export default {
       embeds: [loadingEmbed],
       withResponse: true,
     });
-    const sent = response.resource.message;
 
-    const roundTrip =
-      sent.createdTimestamp -
-      (isInteraction
-        ? messageOrInteraction.createdTimestamp
-        : messageOrInteraction.createdTimestamp);
+    let sent: Message;
+    if (isInteraction) {
+      sent = await (messageOrInteraction as ChatInputCommandInteraction).fetchReply();
+    } else {
+      sent = response as unknown as Message;
+    }
+
+    const roundTrip = sent.createdTimestamp - messageOrInteraction.createdTimestamp;
     const apiPing = client.ws.ping;
 
     pingLogger.debug(`Round-trip ${roundTrip} ms | API ${apiPing} ms`);

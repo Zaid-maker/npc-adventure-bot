@@ -1,20 +1,28 @@
+import { type Message, type ChatInputCommandInteraction, type User } from "discord.js";
 import { DEFAULT_RESPONSES, RUMORS, TOPICS } from "../constants/askLore.js";
 import logger from "../utils/logger.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 const askLogger = logger.child("Command:Ask");
 
-function pickRandom(collection) {
-  return collection[Math.floor(Math.random() * collection.length)];
+function pickRandom<T>(collection: T[]): T {
+  if (collection.length === 0) {
+    throw new Error("Cannot pick from empty collection");
+  }
+  return collection[Math.floor(Math.random() * collection.length)]!;
 }
 
-function identifyTopic(question) {
+function identifyTopic(question: string) {
   const lower = question.toLowerCase();
   return (
     TOPICS.find((topic) =>
       topic.keywords.some((keyword) => lower.includes(keyword.toLowerCase())),
     ) || null
   );
+}
+
+interface CommandExecuteOptions {
+  rawArgs?: string;
 }
 
 export default {
@@ -33,12 +41,19 @@ export default {
       },
     ],
   },
-  async execute(messageOrInteraction, { rawArgs } = {}) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    { rawArgs }: CommandExecuteOptions = {},
+  ): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const question = isInteraction
-      ? messageOrInteraction.options.getString("question")
+      ? (messageOrInteraction as ChatInputCommandInteraction).options.getString("question")
       : rawArgs?.trim();
+
     if (!question) {
       const helpEmbed = createCommandEmbed("ask", {
         color: EMBED_COLORS.warning,

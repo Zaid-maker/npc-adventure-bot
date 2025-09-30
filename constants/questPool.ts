@@ -1,4 +1,10 @@
-const QUEST_POOL = [
+interface QuestTemplate {
+  name: string;
+  description: string;
+  rewardCoins: number;
+}
+
+const QUEST_POOL: QuestTemplate[] = [
   // 🟢 Easy
   {
     name: "Greet the Tavern",
@@ -28,7 +34,7 @@ const QUEST_POOL = [
   },
   {
     name: "Check the Quest Board",
-    description: "Use !board to read today’s quest board.",
+    description: "Use !board to read today's quest board.",
     rewardCoins: 15,
   },
   // 🔴 Hard

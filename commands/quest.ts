@@ -1,3 +1,4 @@
+import { type Message, type ChatInputCommandInteraction, type User, type Guild } from "discord.js";
 import { getQuestWithProgress, getQuestRequirement } from "../services/questService.js";
 import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
@@ -11,19 +12,35 @@ export default {
     description:
       "Check your progress on the active daily quest (auto-completes when requirements met).",
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
-    const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
+    const guild: Guild | null = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).guild
+      : (messageOrInteraction as Message).guild;
+
+    if (!guild) {
+      const embed = createCommandEmbed("quest", {
+        color: EMBED_COLORS.danger,
+        title: "Error",
+        description: "This command can only be used in a server.",
+      });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
+    }
 
     const settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
-    if (!settings || !settings.questChannelId) {
+    if (!settings || !(settings as any).questChannelId) {
       const embed = createCommandEmbed("quest", {
         color: EMBED_COLORS.warning,
         title: "Setup Required",
         description: "Please set up a quest channel first using `!setquestchannel #channel`.",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
     const { quest, progress } = await getQuestWithProgress(user.id);
@@ -42,12 +59,12 @@ export default {
     const fields = [
       {
         name: "Reward",
-        value: `${quest.rewardCoins} coins`,
+        value: `${(quest as any).rewardCoins} coins`,
         inline: true,
       },
       {
         name: "Resets",
-        value: quest.resetAt.toLocaleString(),
+        value: (quest as any).resetAt.toLocaleString(),
         inline: true,
       },
     ];
@@ -56,8 +73,8 @@ export default {
     const targetCount = requirement.count;
 
     if (progress) {
-      const currentProgress = progress.progress;
-      const isCompleted = progress.completed;
+      const currentProgress = (progress as any).progress;
+      const isCompleted = (progress as any).completed;
 
       let progressText;
       if (isCompleted) {
@@ -81,7 +98,7 @@ export default {
         inline: false,
       });
 
-      if (isCompleted && progress.claimed) {
+      if (isCompleted && (progress as any).claimed) {
         fields.push({
           name: "Status",
           value: "🎉 **Reward Claimed!**",
@@ -97,9 +114,9 @@ export default {
     }
 
     const embed = createCommandEmbed("quest", {
-      color: progress?.completed ? EMBED_COLORS.success : EMBED_COLORS.info,
-      title: quest.name,
-      description: quest.description,
+      color: (progress as any)?.completed ? EMBED_COLORS.success : EMBED_COLORS.info,
+      title: (quest as any).name,
+      description: (quest as any).description,
       fields,
       footer: { text: "This quest auto-completes when you meet the requirements!" },
     });

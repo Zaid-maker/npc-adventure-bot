@@ -1,8 +1,13 @@
+import { Message, ChatInputCommandInteraction, GuildMember, TextChannel } from "discord.js";
 import GuildSettings from "../models/GuildSettings.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import logger from "../utils/logger.js";
 
 const setQuestChannelLogger = logger.child("Command:SetQuestChannel");
+
+interface CommandExecuteOptions {
+  args?: string[];
+}
 
 export default {
   name: "setquestchannel",
@@ -19,9 +24,15 @@ export default {
       },
     ],
   },
-  async execute(messageOrInteraction, { args } = {}) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const member = isInteraction ? messageOrInteraction.member : messageOrInteraction.member;
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    { args }: CommandExecuteOptions = {},
+  ): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const member: GuildMember = isInteraction
+      ? (messageOrInteraction.member as GuildMember)
+      : (messageOrInteraction.member as GuildMember);
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
 
     if (!member.permissions.has("ManageChannels")) {
@@ -30,13 +41,14 @@ export default {
         title: "Permission Denied",
         description: "You need `Manage Channels` permission to set the quest channel.",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
     const channel = isInteraction
-      ? messageOrInteraction.options.getChannel("channel")
-      : messageOrInteraction.mentions.channels.first() ||
-        messageOrInteraction.guild.channels.cache.get(args[0]);
+      ? (messageOrInteraction as ChatInputCommandInteraction).options.getChannel("channel")
+      : (messageOrInteraction as Message).mentions.channels.first() ||
+        (messageOrInteraction as Message).guild!.channels.cache.get(args?.[0] || "");
     if (!channel) {
       const embed = createCommandEmbed("setquestchannel", {
         color: EMBED_COLORS.warning,
@@ -44,7 +56,8 @@ export default {
         description:
           "Please mention a channel or provide its ID.\nExample: `!setquestchannel #quests`",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
     if (channel.type !== 0) {
@@ -54,20 +67,21 @@ export default {
         title: "Invalid Channel Type",
         description: "Please select a text channel.",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
-    const existingSettings = await GuildSettings.findOne({ where: { guildId: guild.id } });
+    const existingSettings = await GuildSettings.findOne({ where: { guildId: guild!.id } });
 
     await GuildSettings.upsert({
-      guildId: guild.id,
+      guildId: guild!.id,
       questChannelId: channel.id,
     });
 
     const action = existingSettings ? "updated" : "set";
 
     setQuestChannelLogger.info(
-      `Quest channel ${action} to ${channel.name} (${channel.id}) in guild ${guild.name}`,
+      `Quest channel ${action} to ${(channel as TextChannel).name} (${channel.id}) in guild ${guild!.name}`,
     );
 
     const embed = createCommandEmbed("setquestchannel", {

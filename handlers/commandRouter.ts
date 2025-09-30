@@ -1,10 +1,25 @@
+import { Message } from "discord.js";
 import logger from "../utils/logger.js";
 
 const commandLogger = logger.child("CommandRouter");
-const commands = new Map();
+const commands = new Map<string, Command>();
 export const PREFIX = "!";
 
-function addCommand(command) {
+interface Command {
+  name: string;
+  aliases?: string[];
+  execute: (message: Message, options: CommandExecuteOptions) => Promise<void> | void;
+  slashCommandData?: any; // For slash command registration
+}
+
+interface CommandExecuteOptions {
+  args: string[];
+  rawArgs: string;
+  prefix: string;
+  commandName: string;
+}
+
+function addCommand(command: Command): void {
   if (!command || !command.name || typeof command.execute !== "function") {
     throw new Error("Invalid command definition provided to command router.");
   }
@@ -19,21 +34,21 @@ function addCommand(command) {
   }
 }
 
-export function registerCommands(commandList) {
+export function registerCommands(commandList: Command[]): void {
   for (const command of commandList) {
     addCommand(command);
   }
 }
 
-export function listCommands() {
+export function listCommands(): Command[] {
   return [...new Set(commands.values())];
 }
 
-export function getCommand(name) {
+export function getCommand(name: string): Command | undefined {
   return commands.get(name.toLowerCase());
 }
 
-export async function handleCommand(message) {
+export async function handleCommand(message: Message): Promise<boolean> {
   if (!message.content.startsWith(PREFIX)) {
     return false;
   }
@@ -70,3 +85,5 @@ export async function handleCommand(message) {
 
   return true;
 }
+
+export type { Command, CommandExecuteOptions };

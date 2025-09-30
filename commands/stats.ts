@@ -1,3 +1,4 @@
+import { type Message, type ChatInputCommandInteraction, type User } from "discord.js";
 import Player from "../models/Player.js";
 import QuestProgress from "../models/QuestProgress.js";
 import { getQuestWithProgress } from "../services/questService.js";
@@ -6,7 +7,7 @@ import logger from "../utils/logger.js";
 
 const statsLogger = logger.child("Command:Stats");
 
-function formatLastTurnIn(lastCompletedAt) {
+function formatLastTurnIn(lastCompletedAt: Date | null): string {
   if (!lastCompletedAt) {
     return "No turn-ins yet.";
   }
@@ -17,7 +18,7 @@ function formatLastTurnIn(lastCompletedAt) {
   return `<t:${epochSeconds}:R>`;
 }
 
-function formatActiveQuest(quest, progress) {
+function formatActiveQuest(quest: any, progress: any): string {
   if (!quest) {
     return "No daily quest is active right now.";
   }
@@ -48,9 +49,12 @@ export default {
     name: "stats",
     description: "See your overall adventurer stats.",
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
 
     const userId = user.id;
 
@@ -67,7 +71,7 @@ export default {
     const { quest, progress } = await getQuestWithProgress(userId);
 
     statsLogger.debug(
-      `Profile lookup for ${user.tag}: coins=${player.coins}, streak=${player.streak}, completed=${completedCount}, claimed=${claimedCount}`,
+      `Profile lookup for ${user.tag}: coins=${(player as any).coins}, streak=${(player as any).streak}, completed=${completedCount}, claimed=${claimedCount}`,
     );
 
     const embed = createCommandEmbed("stats", {
@@ -77,13 +81,13 @@ export default {
       fields: [
         {
           name: "Coin Pouch",
-          value: `${player.coins} coins`,
+          value: `${(player as any).coins} coins`,
           inline: true,
         },
         {
           name: "Daily Streak",
-          value: player.streak
-            ? `${player.streak} day${player.streak === 1 ? "" : "s"} 🔥`
+          value: (player as any).streak
+            ? `${(player as any).streak} day${(player as any).streak === 1 ? "" : "s"} 🔥`
             : "No active streak",
           inline: true,
         },
@@ -97,7 +101,7 @@ export default {
         },
         {
           name: "Last Turn-In",
-          value: formatLastTurnIn(player.lastCompletedAt),
+          value: formatLastTurnIn((player as any).lastCompletedAt),
           inline: true,
         },
         {

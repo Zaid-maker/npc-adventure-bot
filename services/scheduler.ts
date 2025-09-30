@@ -1,11 +1,12 @@
+import { Client } from "discord.js";
 import { generateDailyQuest, getMsUntilNextReset } from "./questService.js";
 import logger from "../utils/logger.js";
 
 const schedulerLogger = logger.child("Scheduler");
 
-let resetTimeout = null;
+let resetTimeout: NodeJS.Timeout | null = null;
 
-export function scheduleDailyReset(client) {
+export function scheduleDailyReset(client: Client): NodeJS.Timeout | null {
   if (resetTimeout) {
     clearTimeout(resetTimeout);
   }
@@ -27,7 +28,7 @@ export function scheduleDailyReset(client) {
   return resetTimeout;
 }
 
-export function cancelDailyReset() {
+export function cancelDailyReset(): void {
   if (resetTimeout) {
     clearTimeout(resetTimeout);
     resetTimeout = null;

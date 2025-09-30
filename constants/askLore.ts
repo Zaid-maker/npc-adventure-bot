@@ -1,4 +1,12 @@
-const TOPICS = [
+interface Topic {
+  id: string;
+  title: string;
+  color: number;
+  keywords: string[];
+  responses: string[];
+}
+
+const TOPICS: Topic[] = [
   {
     id: "magic",
     title: "Arcane Whispers",
@@ -56,14 +64,14 @@ const TOPICS = [
   },
 ];
 
-const DEFAULT_RESPONSES = [
+const DEFAULT_RESPONSES: string[] = [
   "Hmm... even the archives don't speak plainly on that. Maybe they're hiding something.",
   "Your curiosity is a lantern; let it lead, but beware who follows the light.",
   "The road to that answer is cobbled with favors owed and debts unpaid.",
   "I could tell you, but then you'd owe me a story twice as captivating.",
 ];
 
-const RUMORS = [
+const RUMORS: string[] = [
   "A traveling merchant arrived with potions that smell like thunderstorms.",
   "Someone spotted a ghost in the wheat fields, humming lullabies from a forgotten kingdom.",
   "The guild is hiring adventurers discreetly—something about a vault that won't stay locked.",

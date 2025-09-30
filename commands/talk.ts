@@ -1,3 +1,4 @@
+import { type Message, type ChatInputCommandInteraction } from "discord.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 const replies = [
@@ -13,8 +14,8 @@ export default {
     name: "talk",
     description: "Chat with the NPC merchant.",
   },
-  async execute(messageOrInteraction) {
-    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const randomReply = replies[Math.floor(Math.random() * replies.length)]!;
     const embed = createCommandEmbed("talk", {
       color: EMBED_COLORS.info,
       title: "🧺 Merchant's Greeting",

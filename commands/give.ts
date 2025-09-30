@@ -1,3 +1,4 @@
+import { Message, ChatInputCommandInteraction, User, GuildMember } from "discord.js";
 import Player from "../models/Player.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import logger from "../utils/logger.js";
@@ -34,9 +35,12 @@ export default {
       },
     ],
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
 
     // Check if user is bot owner
@@ -44,28 +48,30 @@ export default {
     if (!ownerId) {
       giveLogger.error("OWNER_ID not set in environment variables");
       const embed = createCommandEmbed("give", {
-        color: EMBED_COLORS.error,
+        color: EMBED_COLORS.danger,
         title: "❌ Configuration Error",
         description: "Bot owner ID is not configured.",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
     if (user.id !== ownerId) {
       giveLogger.warn(`Unauthorized give attempt by user ${user.id} (${user.username})`);
       const embed = createCommandEmbed("give", {
-        color: EMBED_COLORS.error,
+        color: EMBED_COLORS.danger,
         title: "❌ Access Denied",
         description: "This command is restricted to the bot owner only.",
       });
-      return messageOrInteraction.reply({ embeds: [embed] });
+      await messageOrInteraction.reply({ embeds: [embed] });
+      return;
     }
 
     try {
       // Get target user
       const targetUser = isInteraction
-        ? messageOrInteraction.options.getUser("user")
-        : messageOrInteraction.mentions.users.first();
+        ? (messageOrInteraction as ChatInputCommandInteraction).options.getUser("user")
+        : (messageOrInteraction as Message).mentions.users.first();
 
       if (!targetUser) {
         const embed = createCommandEmbed("give", {
@@ -73,7 +79,8 @@ export default {
           title: "⚠️ Invalid User",
           description: "Please specify a valid user to give coins to.",
         });
-        return messageOrInteraction.reply({ embeds: [embed] });
+        await messageOrInteraction.reply({ embeds: [embed] });
+        return;
       }
 
       if (targetUser.id === user.id) {
@@ -82,7 +89,8 @@ export default {
           title: "⚠️ Invalid Target",
           description: "You cannot give coins to yourself.",
         });
-        return messageOrInteraction.reply({ embeds: [embed] });
+        await messageOrInteraction.reply({ embeds: [embed] });
+        return;
       }
 
       if (targetUser.bot) {
@@ -91,24 +99,26 @@ export default {
           title: "⚠️ Invalid Target",
           description: "You cannot give coins to bots.",
         });
-        return messageOrInteraction.reply({ embeds: [embed] });
+        await messageOrInteraction.reply({ embeds: [embed] });
+        return;
       }
 
       // Double-check target user is still a member (in case they left during execution)
-      const targetMemberCheck = await guild.members.fetch(targetUser.id).catch(() => null);
+      const targetMemberCheck = await guild!.members.fetch(targetUser.id).catch(() => null);
       if (!targetMemberCheck) {
         const embed = createCommandEmbed("give", {
           color: EMBED_COLORS.warning,
           title: "⚠️ User Left Server",
           description: "The target user is no longer a member of this server.",
         });
-        return messageOrInteraction.reply({ embeds: [embed] });
+        await messageOrInteraction.reply({ embeds: [embed] });
+        return;
       }
 
       // Get amount
       const amount = isInteraction
-        ? messageOrInteraction.options.getInteger("amount")
-        : parseInt(messageOrInteraction.content.split(" ")[2]);
+        ? (messageOrInteraction as ChatInputCommandInteraction).options.getInteger("amount")
+        : parseInt((messageOrInteraction as Message).content.split(" ")[2] || "0");
 
       if (!amount || amount < 1 || amount > 10000) {
         const embed = createCommandEmbed("give", {
@@ -116,8 +126,16 @@ export default {
           title: "⚠️ Invalid Amount",
           description: "Please specify an amount between 1 and 10,000 coins.",
         });
-        return messageOrInteraction.reply({ embeds: [embed] });
+        await messageOrInteraction.reply({ embeds: [embed] });
+        return;
       }
+
+      // Get or create target player first for balance check
+      const [targetPlayer] = await Player.findOrCreate({
+        where: { userId: targetUser.id },
+        defaults: { coins: 0, streak: 0 },
+      });
+      const targetPlayerData = targetPlayer as any;
 
       // Check daily limit (50,000 coins per day)
       const today = new Date();
@@ -146,7 +164,7 @@ export default {
             },
             {
               name: "Current Balance",
-              value: `${targetPlayer.coins} 🪙`,
+              value: `${targetPlayerData.coins} 🪙`,
               inline: true,
             },
           ],
@@ -161,24 +179,18 @@ export default {
         }
       }
 
-      // Get or create target player
-      const [targetPlayer] = await Player.findOrCreate({
-        where: { userId: targetUser.id },
-        defaults: { coins: 0, streak: 0 },
-      });
-
       // Get reason (optional)
       const reason = isInteraction
-        ? messageOrInteraction.options.getString("reason")
-        : messageOrInteraction.content.split(" ").slice(3).join(" ") || null;
+        ? (messageOrInteraction as ChatInputCommandInteraction).options.getString("reason")
+        : (messageOrInteraction as Message).content.split(" ").slice(3).join(" ") || null;
 
       // Add coins
-      const oldBalance = targetPlayer.coins;
-      targetPlayer.coins += amount;
+      const oldBalance = targetPlayerData.coins;
+      targetPlayerData.coins += amount;
       await targetPlayer.save();
 
       giveLogger.info(
-        `Owner ${user.username} gave ${amount} coins to ${targetUser.username} (${oldBalance} → ${targetPlayer.coins})${reason ? ` - Reason: ${reason}` : ""}`,
+        `Owner ${user.username} gave ${amount} coins to ${targetUser.username} (${oldBalance} → ${targetPlayerData.coins})${reason ? ` - Reason: ${reason}` : ""}`,
       );
 
       // Create success embed
@@ -198,7 +210,7 @@ export default {
           },
           {
             name: "💰 Balance Change",
-            value: `${oldBalance.toLocaleString()} → ${targetPlayer.coins.toLocaleString()}`,
+            value: `${oldBalance.toLocaleString()} → ${targetPlayerData.coins.toLocaleString()}`,
             inline: true,
           },
           ...(reason
@@ -211,7 +223,7 @@ export default {
               ]
             : []),
         ],
-        footer: { text: `Admin action by ${user.username} • ${guild.name}` },
+        footer: { text: `Admin action by ${user.username} • ${guild!.name}` },
         timestamp: true,
       });
 
@@ -219,7 +231,7 @@ export default {
     } catch (error) {
       giveLogger.error("Error executing give command:", error);
       const embed = createCommandEmbed("give", {
-        color: EMBED_COLORS.error,
+        color: EMBED_COLORS.danger,
         title: "❌ Error",
         description: "There was an error while giving coins. Please try again later.",
       });

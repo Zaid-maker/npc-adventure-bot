@@ -1,3 +1,4 @@
+import { Client, Message } from "discord.js";
 import Quest from "../models/Quest.js";
 import QuestProgress from "../models/QuestProgress.js";
 import Player from "../models/Player.js";
@@ -11,7 +12,7 @@ const questLogger = logger.child("QuestService");
 // Quest tracking patterns
 const QUEST_PATTERNS = {
   // Message-based quests
-  message: (quest, content) => {
+  message: (quest: any, content: string): boolean => {
     if (quest.name === "Send 5 Messages" || quest.name === "Daily Chat Champion") {
       return true; // Any message counts
     }
@@ -22,7 +23,7 @@ const QUEST_PATTERNS = {
   },
 
   // Command-based quests
-  command: (quest, content) => {
+  command: (quest: any, content: string): boolean => {
     if (quest.name === "Talk to NPC 3 times" && content.startsWith("!talk")) {
       return true;
     }
@@ -36,12 +37,12 @@ const QUEST_PATTERNS = {
   },
 
   // State-based quests (checked separately)
-  state: (quest) => {
+  state: (quest: any): boolean => {
     return ["Earn 30 Coins", "Generous Spirit", "Quest Veteran"].includes(quest.name);
   },
 };
 
-function getQuestRequirement(quest) {
+function getQuestRequirement(quest: any) {
   const desc = quest.description.toLowerCase();
 
   if (desc.includes("hello")) return { type: "message", keyword: "hello", count: 3 };
@@ -56,34 +57,34 @@ function getQuestRequirement(quest) {
 
 export { getQuestRequirement };
 
-function getTomorrowMidnight() {
+function getTomorrowMidnight(): Date {
   const date = new Date();
   date.setHours(24, 0, 0, 0);
   return date;
 }
 
-export function getNextResetDate() {
+export function getNextResetDate(): Date {
   return getTomorrowMidnight();
 }
 
-export function getMsUntilNextReset() {
+export function getMsUntilNextReset(): number {
   return getTomorrowMidnight().getTime() - Date.now();
 }
 
-async function announceQuest(client, quest) {
+async function announceQuest(client: Client, quest: any): Promise<void> {
   if (!client) return;
 
   for (const guild of client.guilds.cache.values()) {
     let settings = await GuildSettings.findOne({ where: { guildId: guild.id } });
-    if (!settings || !settings.questChannelId) {
+    if (!settings || !(settings as any).questChannelId) {
       // Fallback to env if no setting
       const fallbackChannelId = process.env.QUEST_CHANNEL_ID;
       if (!fallbackChannelId) continue;
-      settings = { questChannelId: fallbackChannelId };
+      settings = { questChannelId: fallbackChannelId } as any;
     }
 
     try {
-      const channel = await client.channels.fetch(settings.questChannelId);
+      const channel = await client.channels.fetch((settings as any).questChannelId);
       if (!channel) continue;
 
       const embed = createEmbed({
@@ -111,14 +112,14 @@ async function announceQuest(client, quest) {
         timestamp: true,
       });
 
-      await channel.send({ embeds: [embed] });
+      await (channel as any).send({ embeds: [embed] });
     } catch (error) {
       questLogger.error(`Failed to announce quest in guild ${guild.id}:`, error);
     }
   }
 }
 
-export async function generateDailyQuest(client) {
+export async function generateDailyQuest(client: Client): Promise<any> {
   const chosen = QUEST_POOL[Math.floor(Math.random() * QUEST_POOL.length)];
 
   await Quest.destroy({ where: { daily: true } });
@@ -129,17 +130,17 @@ export async function generateDailyQuest(client) {
     resetAt: getTomorrowMidnight(),
   });
 
-  questLogger.info(`🌄 New Daily Quest: ${quest.name}`);
+  questLogger.info(`🌄 New Daily Quest: ${(quest as any).name}`);
   await announceQuest(client, quest);
 
   return quest;
 }
 
-export function getActiveQuest() {
+export function getActiveQuest(): Promise<any> {
   return Quest.findOne({ where: { daily: true } });
 }
 
-export async function getQuestWithProgress(userId) {
+export async function getQuestWithProgress(userId: string): Promise<any> {
   const quest = await getActiveQuest();
   if (!quest) {
     return { quest: null, progress: null };
@@ -152,7 +153,7 @@ export async function getQuestWithProgress(userId) {
   return { quest, progress };
 }
 
-export async function trackQuestProgress(message) {
+export async function trackQuestProgress(message: Message): Promise<any> {
   const quest = await getActiveQuest();
   if (!quest) return null;
 
@@ -168,13 +169,13 @@ export async function trackQuestProgress(message) {
   const requirement = getQuestRequirement(quest);
 
   if (requirement.type === "message" && QUEST_PATTERNS.message(quest, content)) {
-    progress.progress += 1;
+    (progress as any).progress += 1;
     updated = true;
   } else if (
     requirement.type === "command" &&
     QUEST_PATTERNS.command(quest, message.content.toLowerCase())
   ) {
-    progress.progress += 1;
+    (progress as any).progress += 1;
     updated = true;
   }
 
@@ -182,7 +183,7 @@ export async function trackQuestProgress(message) {
   let isCompleted = false;
 
   if (requirement.type === "message" || requirement.type === "command") {
-    isCompleted = progress.progress >= requirement.count;
+    isCompleted = (progress as any).progress >= requirement.count;
   } else if (requirement.type === "state") {
     // Handle state-based quests
     if (quest.name === "Earn 30 Coins") {
@@ -190,13 +191,13 @@ export async function trackQuestProgress(message) {
         where: { userId: message.author.id },
         defaults: { coins: 0, streak: 0 },
       });
-      isCompleted = player.coins >= 30;
+      isCompleted = (player as any).coins >= 30;
     }
     // Other state-based quests can be added here
   }
 
-  if (isCompleted && !progress.completed) {
-    progress.completed = true;
+  if (isCompleted && !(progress as any).completed) {
+    (progress as any).completed = true;
     updated = true;
 
     // Automatically claim the reward for completed quests
@@ -220,7 +221,11 @@ export async function trackQuestProgress(message) {
   return { quest, progress };
 }
 
-async function sendQuestCompletionNotification(message, quest, rewardResult) {
+async function sendQuestCompletionNotification(
+  message: Message,
+  quest: any,
+  rewardResult: any,
+): Promise<void> {
   const embed = createEmbed({
     color: EMBED_COLORS.success,
     title: "🎉 Quest Completed!",
@@ -253,14 +258,14 @@ async function sendQuestCompletionNotification(message, quest, rewardResult) {
   }
 }
 
-export async function autoClaimQuestReward(userId) {
+export async function autoClaimQuestReward(userId: string): Promise<any> {
   const { quest, progress } = await getQuestWithProgress(userId);
 
-  if (!quest || !progress || !progress.completed || progress.claimed) {
+  if (!quest || !progress || !(progress as any).completed || (progress as any).claimed) {
     return null; // Quest not ready for auto-claiming
   }
 
-  progress.claimed = true;
+  (progress as any).claimed = true;
   await progress.save();
 
   const [player] = await Player.findOrCreate({
@@ -272,32 +277,33 @@ export async function autoClaimQuestReward(userId) {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (player.lastCompletedAt) {
-    const last = new Date(player.lastCompletedAt);
+  const playerData = player as any;
+  if (playerData.lastCompletedAt) {
+    const last = new Date(playerData.lastCompletedAt);
     if (last.toDateString() === yesterday.toDateString()) {
-      player.streak += 1;
+      playerData.streak += 1;
     } else if (last.toDateString() !== today.toDateString()) {
-      player.streak = 1;
+      playerData.streak = 1;
     }
   } else {
-    player.streak = 1;
+    playerData.streak = 1;
   }
 
-  const bonus = player.streak * 5;
+  const bonus = playerData.streak * 5;
 
-  player.coins += quest.rewardCoins + bonus;
-  player.lastCompletedAt = today;
+  playerData.coins += quest.rewardCoins + bonus;
+  playerData.lastCompletedAt = today;
   await player.save();
 
   return {
     quest,
     bonus,
-    streak: player.streak,
-    totalCoins: player.coins,
+    streak: playerData.streak,
+    totalCoins: playerData.coins,
   };
 }
 
-export async function claimQuestReward(userId) {
+export async function claimQuestReward(userId: string): Promise<any> {
   const { quest, progress } = await getQuestWithProgress(userId);
 
   if (!quest) {
@@ -308,15 +314,15 @@ export async function claimQuestReward(userId) {
     throw new Error("❌ You haven’t started this quest yet.");
   }
 
-  if (!progress.completed) {
+  if (!(progress as any).completed) {
     throw new Error(`⏳ You haven’t finished **${quest.name}** yet.`);
   }
 
-  if (progress.claimed) {
+  if ((progress as any).claimed) {
     throw new Error("✅ You’ve already claimed this quest’s reward today.");
   }
 
-  progress.claimed = true;
+  (progress as any).claimed = true;
   await progress.save();
 
   const [player] = await Player.findOrCreate({
@@ -328,27 +334,28 @@ export async function claimQuestReward(userId) {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (player.lastCompletedAt) {
-    const last = new Date(player.lastCompletedAt);
+  const playerData = player as any;
+  if (playerData.lastCompletedAt) {
+    const last = new Date(playerData.lastCompletedAt);
     if (last.toDateString() === yesterday.toDateString()) {
-      player.streak += 1;
+      playerData.streak += 1;
     } else if (last.toDateString() !== today.toDateString()) {
-      player.streak = 1;
+      playerData.streak = 1;
     }
   } else {
-    player.streak = 1;
+    playerData.streak = 1;
   }
 
-  const bonus = player.streak * 5;
+  const bonus = playerData.streak * 5;
 
-  player.coins += quest.rewardCoins + bonus;
-  player.lastCompletedAt = today;
+  playerData.coins += quest.rewardCoins + bonus;
+  playerData.lastCompletedAt = today;
   await player.save();
 
   return {
     quest,
     bonus,
-    streak: player.streak,
-    totalCoins: player.coins,
+    streak: playerData.streak,
+    totalCoins: playerData.coins,
   };
 }

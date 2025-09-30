@@ -1,3 +1,4 @@
+import { type Message, type ChatInputCommandInteraction } from "discord.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
 export default {
@@ -7,7 +8,7 @@ export default {
     name: "help",
     description: "Show the adventurer's guide.",
   },
-  async execute(messageOrInteraction) {
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
     const embed = createCommandEmbed("help", {
       color: EMBED_COLORS.info,
       title: "📖 Adventurer's Guide",

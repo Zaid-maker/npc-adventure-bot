@@ -1,3 +1,4 @@
+import { type Message, type ChatInputCommandInteraction, type User } from "discord.js";
 import Player from "../models/Player.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 
@@ -8,13 +9,16 @@ export default {
     name: "streak",
     description: "View your current daily quest streak.",
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
 
     const player = await Player.findOne({ where: { userId: user.id } });
 
-    if (!player || player.streak === 0) {
+    if (!player || (player as any).streak === 0) {
       const embed = createCommandEmbed("streak", {
         color: EMBED_COLORS.neutral,
         title: "No Streak Yet",
@@ -29,8 +33,8 @@ export default {
       color: EMBED_COLORS.success,
       title: "🔥 Streak Status",
       fields: [
-        { name: "Current Streak", value: `${player.streak} days`, inline: true },
-        { name: "Bonus per Quest", value: `+${player.streak * 5} coins`, inline: true },
+        { name: "Current Streak", value: `${(player as any).streak} days`, inline: true },
+        { name: "Bonus per Quest", value: `+${(player as any).streak * 5} coins`, inline: true },
       ],
     });
 

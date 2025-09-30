@@ -1,3 +1,4 @@
+import { Message, ChatInputCommandInteraction, User } from "discord.js";
 import Player from "../models/Player.js";
 import Quest from "../models/Quest.js";
 import QuestProgress from "../models/QuestProgress.js";
@@ -7,8 +8,31 @@ import { Op } from "sequelize";
 
 const historyLogger = logger.child("Command:History");
 
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  requirement: (stats: PlayerStats) => boolean;
+  progress: (stats: PlayerStats) => number;
+  maxProgress: number;
+  emoji: string;
+}
+
+interface PlayerStats {
+  totalQuests: number;
+  totalCoins: number;
+  maxStreak: number;
+  todayQuests: number;
+}
+
+interface Title {
+  name: string;
+  requirement: (achievements: string[]) => boolean;
+  emoji: string;
+}
+
 // Achievement definitions with progress tracking
-const ACHIEVEMENTS = [
+const ACHIEVEMENTS: Achievement[] = [
   {
     id: "first_quest",
     name: "First Steps",
@@ -93,7 +117,7 @@ const ACHIEVEMENTS = [
 ];
 
 // Title definitions based on achievements
-const TITLES = [
+const TITLES: Title[] = [
   {
     name: "Novice Adventurer",
     requirement: (achievements) => achievements.includes("first_quest"),
@@ -141,7 +165,11 @@ const TITLES = [
   },
 ];
 
-function getPlayerStats(player, totalCompletedQuests, todayCompletedQuests) {
+function getPlayerStats(
+  player: any,
+  totalCompletedQuests: number,
+  todayCompletedQuests: number,
+): PlayerStats {
   return {
     totalQuests: totalCompletedQuests,
     totalCoins: player.coins,
@@ -150,11 +178,11 @@ function getPlayerStats(player, totalCompletedQuests, todayCompletedQuests) {
   };
 }
 
-function getUnlockedAchievements(stats) {
+function getUnlockedAchievements(stats: PlayerStats): Achievement[] {
   return ACHIEVEMENTS.filter((achievement) => achievement.requirement(stats));
 }
 
-function getAchievementProgress(stats) {
+function getAchievementProgress(stats: PlayerStats) {
   return ACHIEVEMENTS.map((achievement) => {
     const current = achievement.progress(stats);
     const max = achievement.maxProgress;
@@ -172,13 +200,13 @@ function getAchievementProgress(stats) {
   });
 }
 
-function createProgressBar(current, max, length = 10) {
+function createProgressBar(current: number, max: number, length: number = 10): string {
   const filled = Math.floor((current / max) * length);
   const empty = length - filled;
   return "█".repeat(filled) + "░".repeat(empty);
 }
 
-function getUnlockedTitles(achievements) {
+function getUnlockedTitles(achievements: Achievement[]): Title[] {
   const achievementIds = achievements.map((a) => a.id);
   return TITLES.filter((title) => title.requirement(achievementIds));
 }
@@ -190,9 +218,12 @@ export default {
     name: "history",
     description: "View your quest history, achievements, and titles.",
   },
-  async execute(messageOrInteraction) {
-    const isInteraction = messageOrInteraction.isChatInputCommand;
-    const user = isInteraction ? messageOrInteraction.user : messageOrInteraction.author;
+  async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
+    const isInteraction =
+      (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
+    const user: User = isInteraction
+      ? (messageOrInteraction as ChatInputCommandInteraction).user
+      : (messageOrInteraction as Message).author;
     const client = isInteraction ? messageOrInteraction.client : messageOrInteraction.client;
 
     try {
@@ -242,11 +273,13 @@ export default {
 
       // Get quest details for each completed progress
       const questLogPromises = completedProgress.map(async (progress) => {
-        const quest = await Quest.findByPk(progress.questId);
+        const progressData = progress as any;
+        const quest = await Quest.findByPk(progressData.questId);
         if (!quest) return "Unknown Quest";
 
-        const completionDate = progress.updatedAt.toLocaleDateString();
-        return `**${quest.name}** - ${completionDate}\n💰 +${quest.rewardCoins} coins`;
+        const questData = quest as any;
+        const completionDate = progressData.updatedAt.toLocaleDateString();
+        return `**${questData.name}** - ${completionDate}\n💰 +${questData.rewardCoins} coins`;
       });
 
       const questEntries = await Promise.all(questLogPromises);
@@ -256,7 +289,8 @@ export default {
           : "No completed quests yet. Start your adventure with `!quest`!";
 
       // Get player stats and achievements
-      const stats = getPlayerStats(player, totalCompletedQuests, todayCompletedQuests);
+      const playerData = player as any;
+      const stats = getPlayerStats(playerData, totalCompletedQuests, todayCompletedQuests);
       const unlockedAchievements = getUnlockedAchievements(stats);
       const allAchievements = getAchievementProgress(stats);
       const unlockedTitles = getUnlockedTitles(unlockedAchievements);
@@ -277,8 +311,8 @@ export default {
       // Create statistics field
       const statsText = [
         `📊 **Total Quests Completed:** ${totalCompletedQuests}`,
-        `💰 **Current Coins:** ${player.coins}`,
-        `🔥 **Current Streak:** ${player.streak} days`,
+        `💰 **Current Coins:** ${playerData.coins}`,
+        `🔥 **Current Streak:** ${playerData.streak} days`,
         `⚡ **Today's Quests:** ${todayCompletedQuests}`,
         `🏆 **Achievements Unlocked:** ${unlockedAchievements.length}/${ACHIEVEMENTS.length}`,
         `👑 **Titles Earned:** ${unlockedTitles.length}`,
@@ -287,15 +321,15 @@ export default {
       const embed = createCommandEmbed("history", {
         color: EMBED_COLORS.primary,
         title: "📜 Adventurer's History",
-        thumbnail: user.displayAvatarURL({ dynamic: true, size: 128 }),
+        thumbnail: user.displayAvatarURL({ size: 128 }),
         fields: [
           {
-            name: "� Statistics",
+            name: "📊 Statistics",
             value: statsText,
             inline: false,
           },
           {
-            name: "�📋 Recent Quest Log (Last 5)",
+            name: "📋 Recent Quest Log (Last 5)",
             value: questLog,
             inline: false,
           },
@@ -321,7 +355,7 @@ export default {
     } catch (error) {
       historyLogger.error("Error executing history command:", error);
       const embed = createCommandEmbed("history", {
-        color: EMBED_COLORS.error,
+        color: EMBED_COLORS.danger,
         title: "❌ Error",
         description: "There was an error retrieving your history. Please try again later.",
       });
