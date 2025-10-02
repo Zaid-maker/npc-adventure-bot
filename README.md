@@ -52,10 +52,6 @@ npm run dev
 ```bash
 # Using the sharding manager
 npm run start:sharded
-
-# Using PM2 for process management
-npm run start:pm2
-npm run start:pm2:dev  # With auto-restart on changes
 ```
 
 #### Manual Sharding Control
@@ -65,12 +61,6 @@ npm run start:sharded
 
 # Monitor shards
 /shards
-
-# Stop the bot
-npm run stop:pm2
-
-# Restart the bot
-npm run restart:pm2
 ```
 
 ### Shard Management

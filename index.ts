@@ -44,7 +44,7 @@ import shardsCommand from "./commands/shards.js";
 dotenv.config();
 
 // Check if we're running in a shard
-const isSharded = process.env.SHARDING_MANAGER || process.env.PM2_HOME;
+const isSharded = process.env.SHARDING_MANAGER;
 const shardId = process.env.SHARDS ? parseInt(process.env.SHARDS.split(',')[0] || '0') : 0;
 
 if (isSharded) {
