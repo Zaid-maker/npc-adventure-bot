@@ -39,8 +39,19 @@ import streakboardCommand from "./commands/streakboard.js";
 import setquestchannelCommand from "./commands/setquestchannel.js";
 import historyCommand from "./commands/history.js";
 import giveCommand from "./commands/give.js";
+import shardsCommand from "./commands/shards.js";
 
 dotenv.config();
+
+// Check if we're running in a shard
+const isSharded = process.env.SHARDING_MANAGER || process.env.PM2_HOME;
+const shardId = process.env.SHARDS ? parseInt(process.env.SHARDS.split(',')[0] || '0') : 0;
+
+if (isSharded) {
+  logger.info(`🔄 Running in sharded mode - Shard ID: ${shardId}`);
+} else {
+  logger.info("🔄 Running in single-process mode");
+}
 
 registerCommands([
   talkCommand,
@@ -58,6 +69,7 @@ registerCommands([
   setquestchannelCommand,
   historyCommand,
   giveCommand,
+  shardsCommand,
 ]);
 
 const slashCommands: APIApplicationCommand[] = listCommands()
@@ -70,14 +82,19 @@ listCommands()
   .forEach((cmd) => slashCommandMap.set(cmd.name, cmd));
 
 client.once(Events.ClientReady, async (readyClient: Client) => {
-  logger.success(`🤖 NPC Bot is online as ${readyClient.user!.tag}`);
+  logger.success(`🤖 NPC Bot is online as ${readyClient.user!.tag} (Shard ${shardId})`);
 
-  await sequelize.sync();
-  await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync(), GuildSettings.sync()]);
+  // Only the first shard handles database initialization and scheduling
+  if (shardId === 0) {
+    await sequelize.sync();
+    await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync(), GuildSettings.sync()]);
 
-  const quest = await getActiveQuest();
-  if (!quest || new Date() >= (quest as any).resetAt) {
-    await generateDailyQuest(client);
+    const quest = await getActiveQuest();
+    if (!quest || new Date() >= (quest as any).resetAt) {
+      await generateDailyQuest(client);
+    }
+
+    scheduleDailyReset(client);
   }
 
   // Set bot activity with rotation
@@ -105,8 +122,6 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
 
   // Rotate activities every 30 seconds
   setInterval(updateActivity, 30000);
-
-  scheduleDailyReset(client);
 });
 
 client.on(Events.MessageCreate, async (message: Message) => {

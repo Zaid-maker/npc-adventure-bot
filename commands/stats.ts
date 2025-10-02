@@ -2,8 +2,10 @@ import { type Message, type ChatInputCommandInteraction, type User } from "disco
 import Player from "../models/Player.js";
 import QuestProgress from "../models/QuestProgress.js";
 import { getQuestWithProgress } from "../services/questService.js";
+import { getTotalGuildCount, getTotalMemberCount } from "../utils/shardingUtils.js";
 import { createCommandEmbed, EMBED_COLORS } from "../utils/embedBuilder.js";
 import logger from "../utils/logger.js";
+import client from "../config/discordClient.js";
 
 const statsLogger = logger.child("Command:Stats");
 
@@ -70,45 +72,62 @@ export default {
 
     const { quest, progress } = await getQuestWithProgress(userId);
 
+    // Get global bot statistics if sharding is enabled
+    const [totalGuilds, totalMembers] = await Promise.all([
+      getTotalGuildCount(client),
+      getTotalMemberCount(client),
+    ]);
+
     statsLogger.debug(
       `Profile lookup for ${user.tag}: coins=${(player as any).coins}, streak=${(player as any).streak}, completed=${completedCount}, claimed=${claimedCount}`,
     );
+
+    const fields = [
+      {
+        name: "Coin Pouch",
+        value: `${(player as any).coins} coins`,
+        inline: true,
+      },
+      {
+        name: "Daily Streak",
+        value: (player as any).streak
+          ? `${(player as any).streak} day${(player as any).streak === 1 ? "" : "s"} 🔥`
+          : "No active streak",
+        inline: true,
+      },
+      {
+        name: "Quest History",
+        value:
+          completedCount > 0
+            ? `${completedCount} completed\n${claimedCount} rewards claimed`
+            : "No quests completed yet.",
+        inline: true,
+      },
+      {
+        name: "Last Turn-In",
+        value: formatLastTurnIn((player as any).lastCompletedAt),
+        inline: true,
+      },
+      {
+        name: "Today's Quest",
+        value: formatActiveQuest(quest, progress),
+      },
+    ];
+
+    // Add global statistics if sharding is enabled
+    if (client.shard) {
+      fields.splice(3, 0, {
+        name: "🌐 Bot Statistics",
+        value: `${totalGuilds.toLocaleString()} servers\n${totalMembers.toLocaleString()} members`,
+        inline: true,
+      });
+    }
 
     const embed = createCommandEmbed("stats", {
       color: EMBED_COLORS.primary,
       title: "🧭 Adventurer Profile",
       description: `Here\'s where you stand, **${user.username}**.`,
-      fields: [
-        {
-          name: "Coin Pouch",
-          value: `${(player as any).coins} coins`,
-          inline: true,
-        },
-        {
-          name: "Daily Streak",
-          value: (player as any).streak
-            ? `${(player as any).streak} day${(player as any).streak === 1 ? "" : "s"} 🔥`
-            : "No active streak",
-          inline: true,
-        },
-        {
-          name: "Quest History",
-          value:
-            completedCount > 0
-              ? `${completedCount} completed\n${claimedCount} rewards claimed`
-              : "No quests completed yet.",
-          inline: true,
-        },
-        {
-          name: "Last Turn-In",
-          value: formatLastTurnIn((player as any).lastCompletedAt),
-          inline: true,
-        },
-        {
-          name: "Today's Quest",
-          value: formatActiveQuest(quest, progress),
-        },
-      ],
+      fields,
       timestamp: true,
     });
 

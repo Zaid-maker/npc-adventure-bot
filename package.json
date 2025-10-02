@@ -6,8 +6,15 @@
   "scripts": {
     "build": "tsc",
     "dev": "bun run --watch dist/index.js",
-    "start": "node dist/index.js",
     "dev:ts": "bun run build && bun run dev",
+    "dev:sharded": "bun run build && bun run --watch dist/shardManager.js",
+    "start": "node dist/index.js",
+    "start:sharded": "node dist/shardManager.js",
+    "start:pm2": "pm2 start dist/shardManager.js --name npc-bot",
+    "start:pm2:dev": "pm2 start dist/shardManager.js --name npc-bot-dev --watch",
+    "stop:pm2": "pm2 stop npc-bot",
+    "restart:pm2": "pm2 restart npc-bot",
+    "delete:pm2": "pm2 delete npc-bot",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit"
@@ -26,6 +33,7 @@
   "devDependencies": {
     "@types/node": "^24.6.0",
     "discord-api-types": "^0.38.26",
+    "pm2": "^5.3.0",
     "prettier": "^3.6.2",
     "sequelize-typescript": "^2.1.6",
     "typescript": "^5.9.2"
