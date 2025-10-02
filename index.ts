@@ -46,7 +46,7 @@ dotenv.config();
 
 // Check if we're running in a shard
 const isSharded = process.env.SHARDING_MANAGER;
-const shardId = process.env.SHARDS ? parseInt(process.env.SHARDS.split(',')[0] || '0') : 0;
+const shardId = process.env.SHARDS ? parseInt(process.env.SHARDS.split(",")[0] || "0") : 0;
 
 if (isSharded) {
   logger.info(`🔄 Running in sharded mode - Shard ID: ${shardId}`);
@@ -89,7 +89,12 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
   // Only the first shard handles database initialization and scheduling
   if (shardId === 0) {
     await sequelize.sync();
-    await Promise.all([Quest.sync({ alter: true }), QuestProgress.sync({ alter: true }), Player.sync({ alter: true }), GuildSettings.sync({ alter: true })]);
+    await Promise.all([
+      Quest.sync({ alter: true }),
+      QuestProgress.sync({ alter: true }),
+      Player.sync({ alter: true }),
+      GuildSettings.sync({ alter: true }),
+    ]);
 
     const quest = await getActiveQuest();
     if (!quest || new Date() >= (quest as any).resetAt) {

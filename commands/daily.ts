@@ -32,11 +32,11 @@ export default {
     // Check if user has already claimed today
     if (lastClaim) {
       const hoursSinceLastClaim = (now.getTime() - lastClaim.getTime()) / (1000 * 60 * 60);
-      
+
       if (hoursSinceLastClaim < 24) {
         const hoursRemaining = Math.ceil(24 - hoursSinceLastClaim);
         const minutesRemaining = Math.ceil((24 - hoursSinceLastClaim) * 60) % 60;
-        
+
         const embed = createCommandEmbed("daily", {
           color: EMBED_COLORS.warning,
           title: "⏰ Daily Reward Already Claimed",
@@ -44,9 +44,10 @@ export default {
           fields: [
             {
               name: "Next Claim Available",
-              value: hoursRemaining > 0 
-                ? `in ${hoursRemaining}h ${minutesRemaining}m`
-                : `in ${minutesRemaining}m`,
+              value:
+                hoursRemaining > 0
+                  ? `in ${hoursRemaining}h ${minutesRemaining}m`
+                  : `in ${minutesRemaining}m`,
               inline: true,
             },
             {
@@ -84,9 +85,10 @@ export default {
         },
         {
           name: "🔥 Streak Bonus",
-          value: playerData.streak > 0 
-            ? `+${streakBonus} coins (${playerData.streak} day streak)`
-            : "No active streak",
+          value:
+            playerData.streak > 0
+              ? `+${streakBonus} coins (${playerData.streak} day streak)`
+              : "No active streak",
           inline: true,
         },
         {

@@ -12,7 +12,7 @@ export async function getTotalGuildCount(client: Client): Promise<number> {
   }
 
   try {
-    const results = await client.shard.fetchClientValues('guilds.cache.size');
+    const results = await client.shard.fetchClientValues("guilds.cache.size");
     return (results as number[]).reduce((acc, count) => acc + count, 0);
   } catch (error) {
     shardLogger.error("Failed to get total guild count:", error);
@@ -29,7 +29,9 @@ export async function getTotalMemberCount(client: Client): Promise<number> {
   }
 
   try {
-    const results = await client.shard.broadcastEval(c => c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0));
+    const results = await client.shard.broadcastEval((c) =>
+      c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
+    );
     return results.reduce((acc: number, count: number) => acc + count, 0);
   } catch (error) {
     shardLogger.error("Failed to get total member count:", error);
@@ -49,7 +51,11 @@ export async function getShardInfo(client: Client): Promise<{
   uptime: number;
 }> {
   const shardId = client.shard?.ids[0] ?? 0;
-  const shardCount = client.shard ? await client.shard.fetchClientValues('shard.ids.length').then(results => results[0] as number) : 1;
+  const shardCount = client.shard
+    ? await client.shard
+        .fetchClientValues("shard.ids.length")
+        .then((results) => results[0] as number)
+    : 1;
 
   return {
     shardId,
@@ -64,24 +70,28 @@ export async function getShardInfo(client: Client): Promise<{
 /**
  * Get all shard information
  */
-export async function getAllShardInfo(client: Client): Promise<Array<{
-  shardId: number;
-  guilds: number;
-  members: number;
-  ping: number;
-  uptime: number;
-  status: string;
-}>> {
+export async function getAllShardInfo(client: Client): Promise<
+  Array<{
+    shardId: number;
+    guilds: number;
+    members: number;
+    ping: number;
+    uptime: number;
+    status: string;
+  }>
+> {
   if (!client.shard) {
     const info = await getShardInfo(client);
-    return [{
-      shardId: info.shardId,
-      guilds: info.guilds,
-      members: info.members,
-      ping: info.ping,
-      uptime: info.uptime,
-      status: "online",
-    }];
+    return [
+      {
+        shardId: info.shardId,
+        guilds: info.guilds,
+        members: info.members,
+        ping: info.ping,
+        uptime: info.uptime,
+        status: "online",
+      },
+    ];
   }
 
   try {
@@ -92,12 +102,20 @@ export async function getAllShardInfo(client: Client): Promise<Array<{
         members: c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
         ping: c.ws.ping,
         uptime: c.uptime ?? 0,
-        status: c.ws.status === 0 ? "connecting" :
-                c.ws.status === 1 ? "connected" :
-                c.ws.status === 2 ? "reconnecting" :
-                c.ws.status === 3 ? "idle" :
-                c.ws.status === 4 ? "nearly" :
-                c.ws.status === 5 ? "disconnected" : "unknown",
+        status:
+          c.ws.status === 0
+            ? "connecting"
+            : c.ws.status === 1
+              ? "connected"
+              : c.ws.status === 2
+                ? "reconnecting"
+                : c.ws.status === 3
+                  ? "idle"
+                  : c.ws.status === 4
+                    ? "nearly"
+                    : c.ws.status === 5
+                      ? "disconnected"
+                      : "unknown",
       };
     });
 
@@ -105,14 +123,16 @@ export async function getAllShardInfo(client: Client): Promise<Array<{
   } catch (error) {
     shardLogger.error("Failed to get all shard info:", error);
     const info = await getShardInfo(client);
-    return [{
-      shardId: info.shardId,
-      guilds: info.guilds,
-      members: info.members,
-      ping: info.ping,
-      uptime: info.uptime,
-      status: "online",
-    }];
+    return [
+      {
+        shardId: info.shardId,
+        guilds: info.guilds,
+        members: info.members,
+        ping: info.ping,
+        uptime: info.uptime,
+        status: "online",
+      },
+    ];
   }
 }
 
@@ -126,10 +146,13 @@ export async function broadcastMessage(client: Client, message: string): Promise
   }
 
   try {
-    await client.shard.broadcastEval((c, { msg }) => {
-      const logger = require('./utils/logger.js').default;
-      logger.info(`Broadcast: ${msg}`);
-    }, { context: { msg: message } });
+    await client.shard.broadcastEval(
+      (c, { msg }) => {
+        const logger = require("./utils/logger.js").default;
+        logger.info(`Broadcast: ${msg}`);
+      },
+      { context: { msg: message } },
+    );
   } catch (error) {
     shardLogger.error("Failed to broadcast message:", error);
   }
@@ -138,11 +161,15 @@ export async function broadcastMessage(client: Client, message: string): Promise
 /**
  * Send a message to a specific channel across shards
  */
-export async function sendCrossShardMessage(client: Client, channelId: string, content: any): Promise<boolean> {
+export async function sendCrossShardMessage(
+  client: Client,
+  channelId: string,
+  content: any,
+): Promise<boolean> {
   if (!client.shard) {
     try {
       const channel = client.channels.cache.get(channelId);
-      if (channel && 'send' in channel) {
+      if (channel && "send" in channel) {
         await (channel as any).send(content);
         return true;
       }
@@ -154,20 +181,23 @@ export async function sendCrossShardMessage(client: Client, channelId: string, c
   }
 
   try {
-    const results = await client.shard.broadcastEval(async (c, { channelId: id, content: msg }) => {
-      try {
-        const channel = c.channels.cache.get(id);
-        if (channel && 'send' in channel) {
-          await (channel as any).send(msg);
-          return true;
+    const results = await client.shard.broadcastEval(
+      async (c, { channelId: id, content: msg }) => {
+        try {
+          const channel = c.channels.cache.get(id);
+          if (channel && "send" in channel) {
+            await (channel as any).send(msg);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          return false;
         }
-        return false;
-      } catch (error) {
-        return false;
-      }
-    }, { context: { channelId, content } });
+      },
+      { context: { channelId, content } },
+    );
 
-    return results.some(result => result === true);
+    return results.some((result) => result === true);
   } catch (error) {
     shardLogger.error("Failed to send cross-shard message:", error);
     return false;
