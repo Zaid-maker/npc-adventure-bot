@@ -24,7 +24,8 @@ export default {
         .setDescription("How many to buy (default: 1)")
         .setRequired(false)
         .setMinValue(1),
-    ),
+    )
+    .toJSON(),
   async execute(messageOrInteraction: Message | ChatInputCommandInteraction): Promise<void> {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;

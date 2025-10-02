@@ -43,6 +43,8 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 | `CLIENT_ID`        | Your Discord application ID             | Yes      | -       |
 | `TOTAL_SHARDS`     | Number of shards (auto for automatic)   | No       | auto    |
 | `QUEST_CHANNEL_ID` | Default channel for quest announcements | No       | -       |
+| `DB_ALTER`         | Auto-update DB schema on startup (dev only) | No   | false   |
+| `NODE_ENV`         | Environment mode (development/production) | No    | production |
 
 ### Sharding
 

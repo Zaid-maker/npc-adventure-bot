@@ -97,13 +97,15 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
   // Only the first shard handles database initialization and scheduling
   if (shardId === 0) {
     await sequelize.sync();
+    // Use alter mode only in development or when DB_ALTER env var is set
+    const shouldAlter = process.env.DB_ALTER === "true" || process.env.NODE_ENV === "development";
     await Promise.all([
-      Quest.sync({ alter: true }),
-      QuestProgress.sync({ alter: true }),
-      Player.sync({ alter: true }),
-      GuildSettings.sync({ alter: true }),
-      Item.sync({ alter: true }),
-      PlayerInventory.sync({ alter: true }),
+      Quest.sync({ alter: shouldAlter }),
+      QuestProgress.sync({ alter: shouldAlter }),
+      Player.sync({ alter: shouldAlter }),
+      GuildSettings.sync({ alter: shouldAlter }),
+      Item.sync({ alter: shouldAlter }),
+      PlayerInventory.sync({ alter: shouldAlter }),
     ]);
 
     const quest = await getActiveQuest();
