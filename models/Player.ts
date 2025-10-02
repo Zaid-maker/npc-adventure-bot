@@ -19,6 +19,10 @@ const Player = sequelize.define("Player", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  lastDailyClaimAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 });
 
 export default Player;

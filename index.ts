@@ -31,6 +31,7 @@ import questCommand from "./commands/quest.js";
 import completeCommand from "./commands/complete.js";
 import streakCommand from "./commands/streak.js";
 import balanceCommand from "./commands/balance.js";
+import dailyCommand from "./commands/daily.js";
 import helpCommand from "./commands/help.js";
 import pingCommand from "./commands/ping.js";
 import statsCommand from "./commands/stats.js";
@@ -61,6 +62,7 @@ registerCommands([
   completeCommand,
   streakCommand,
   balanceCommand,
+  dailyCommand,
   helpCommand,
   pingCommand,
   statsCommand,
@@ -87,7 +89,7 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
   // Only the first shard handles database initialization and scheduling
   if (shardId === 0) {
     await sequelize.sync();
-    await Promise.all([Quest.sync(), QuestProgress.sync(), Player.sync(), GuildSettings.sync()]);
+    await Promise.all([Quest.sync({ alter: true }), QuestProgress.sync({ alter: true }), Player.sync({ alter: true }), GuildSettings.sync({ alter: true })]);
 
     const quest = await getActiveQuest();
     if (!quest || new Date() >= (quest as any).resetAt) {

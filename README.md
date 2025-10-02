@@ -16,7 +16,7 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. Copy `.env` and configure your environment variables:
@@ -28,7 +28,7 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 4. Build the project:
 
    ```bash
-   npm run build
+   bun run build
    ```
 
 ## Configuration
@@ -49,21 +49,21 @@ This bot supports advanced sharding for handling large numbers of guilds. There 
 #### Single Process (Development)
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 #### Sharded (Production)
 
 ```bash
 # Using the sharding manager
-npm run start:sharded
+bun run start:sharded
 ```
 
 #### Manual Sharding Control
 
 ```bash
 # Start sharded bot
-npm run start:sharded
+bun run start:sharded
 
 # Monitor shards
 /shards
@@ -86,6 +86,7 @@ When running in sharded mode, the bot automatically distributes guilds across mu
 - `/ask` - Ask questions to the NPC
 - `/quest` - Check today's quest progress
 - `/complete` - Claim quest rewards
+- `/daily` - Claim your daily coin reward (24-hour cooldown)
 - `/balance` - Check your coin balance
 - `/stats` - View your adventurer profile
 - `/leaderboard` - See top adventurers
@@ -105,21 +106,21 @@ All slash commands also work with the `!` prefix (e.g., `!stats`, `!quest`)
 ### Building
 
 ```bash
-npm run build
+bun run build
 ```
 
 ### Development Mode
 
 ```bash
-npm run dev          # Single process with watch mode
-npm run dev:sharded  # Sharded with watch mode
+bun run dev          # Single process with watch mode
+bun run dev:sharded  # Sharded with watch mode
 ```
 
 ### Code Quality
 
 ```bash
-npm run format       # Format code with Prettier
-npm run type-check   # Run TypeScript type checking
+bun run format       # Format code with Prettier
+bun run type-check   # Run TypeScript type checking
 ```
 
 ## Architecture
