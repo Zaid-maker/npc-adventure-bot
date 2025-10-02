@@ -14,16 +14,19 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Copy `.env` and configure your environment variables:
+
    ```bash
    cp .env .env.local
    ```
 
 4. Build the project:
+
    ```bash
    npm run build
    ```
@@ -44,17 +47,20 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 This bot supports advanced sharding for handling large numbers of guilds. There are several ways to run the bot:
 
 #### Single Process (Development)
+
 ```bash
 npm run dev
 ```
 
 #### Sharded (Production)
+
 ```bash
 # Using the sharding manager
 npm run start:sharded
 ```
 
 #### Manual Sharding Control
+
 ```bash
 # Start sharded bot
 npm run start:sharded
@@ -75,6 +81,7 @@ When running in sharded mode, the bot automatically distributes guilds across mu
 ## Commands
 
 ### User Commands
+
 - `/talk` - Chat with the NPC
 - `/ask` - Ask questions to the NPC
 - `/quest` - Check today's quest progress
@@ -85,26 +92,31 @@ When running in sharded mode, the bot automatically distributes guilds across mu
 - `/streakboard` - View streak leaderboards
 
 ### Administrative Commands
+
 - `/setquestchannel` - Set the quest announcement channel
 - `/shards` - Monitor shard status (sharding only)
 
 ### Legacy Prefix Commands
+
 All slash commands also work with the `!` prefix (e.g., `!stats`, `!quest`)
 
 ## Development
 
 ### Building
+
 ```bash
 npm run build
 ```
 
 ### Development Mode
+
 ```bash
 npm run dev          # Single process with watch mode
 npm run dev:sharded  # Sharded with watch mode
 ```
 
 ### Code Quality
+
 ```bash
 npm run format       # Format code with Prettier
 npm run type-check   # Run TypeScript type checking
@@ -113,6 +125,7 @@ npm run type-check   # Run TypeScript type checking
 ## Architecture
 
 ### Directory Structure
+
 ```
 ├── commands/         # Discord commands
 ├── config/          # Configuration files
