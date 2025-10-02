@@ -20,6 +20,9 @@ const manager = new ShardingManager(path.join(__dirname, "index.js"), {
 manager.on("shardCreate", (shard) => {
   logger.info(`🚀 Launched shard ${shard.id}`);
 
+  // Increase the ready timeout to 60 seconds
+  (shard as any).readyTimeout = 60000;
+
   shard.on("ready", () => {
     logger.success(`✅ Shard ${shard.id} is ready`);
   });
