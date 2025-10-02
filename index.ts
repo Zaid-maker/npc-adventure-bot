@@ -18,6 +18,8 @@ import Quest from "./models/Quest.js";
 import QuestProgress from "./models/QuestProgress.js";
 import Player from "./models/Player.js";
 import GuildSettings from "./models/GuildSettings.js";
+import Item from "./models/Item.js";
+import PlayerInventory from "./models/PlayerInventory.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
 import { registerCommands, handleCommand, listCommands, PREFIX } from "./handlers/commandRouter.js";
@@ -32,6 +34,9 @@ import completeCommand from "./commands/complete.js";
 import streakCommand from "./commands/streak.js";
 import balanceCommand from "./commands/balance.js";
 import dailyCommand from "./commands/daily.js";
+import shopCommand from "./commands/shop.js";
+import buyCommand from "./commands/buy.js";
+import inventoryCommand from "./commands/inventory.js";
 import helpCommand from "./commands/help.js";
 import pingCommand from "./commands/ping.js";
 import statsCommand from "./commands/stats.js";
@@ -63,6 +68,9 @@ registerCommands([
   streakCommand,
   balanceCommand,
   dailyCommand,
+  shopCommand,
+  buyCommand,
+  inventoryCommand,
   helpCommand,
   pingCommand,
   statsCommand,
@@ -94,6 +102,8 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
       QuestProgress.sync({ alter: true }),
       Player.sync({ alter: true }),
       GuildSettings.sync({ alter: true }),
+      Item.sync({ alter: true }),
+      PlayerInventory.sync({ alter: true }),
     ]);
 
     const quest = await getActiveQuest();

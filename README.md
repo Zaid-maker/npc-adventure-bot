@@ -8,6 +8,8 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 - 🏆 **Leaderboards**: Compete with other adventurers for the top spots
 - 🔥 **Streaks**: Maintain daily activity streaks for bonus rewards
 - 💰 **Economy System**: Earn and spend coins on various activities
+- 🏪 **Shop System**: Purchase power-ups, boosts, and cosmetic items
+- 🎒 **Inventory**: Collect and manage your items
 - 🔄 **Advanced Sharding**: Scale to thousands of servers with automatic sharding
 
 ## Installation
@@ -88,6 +90,9 @@ When running in sharded mode, the bot automatically distributes guilds across mu
 - `/complete` - Claim quest rewards
 - `/daily` - Claim your daily coin reward (24-hour cooldown)
 - `/balance` - Check your coin balance
+- `/shop` - Browse the adventurer's shop
+- `/buy <item> [quantity]` - Purchase items from the shop
+- `/inventory` (or `/inv`) - View your purchased items
 - `/stats` - View your adventurer profile
 - `/leaderboard` - See top adventurers
 - `/streakboard` - View streak leaderboards

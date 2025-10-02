@@ -30,9 +30,12 @@ export default {
           name: "💰 Economy",
           value:
             "`!balance` — Check your coin balance.\n" +
+            "`!daily` — Claim your daily coin reward (24h cooldown).\n" +
+            "`!shop` — Browse items available for purchase.\n" +
+            "`!buy <item>` — Purchase an item from the shop.\n" +
+            "`!inventory` or `!inv` — View your purchased items.\n" +
             "`!leaderboard` — View the top adventurers.\n" +
-            "`!streakboard` — View the top streaks.\n" +
-            "`!trade @user <amount>` — (Coming soon) Gift coins to another adventurer.",
+            "`!streakboard` — View the top streaks.",
         },
         {
           name: "💡 Other",
