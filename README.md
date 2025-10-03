@@ -33,18 +33,23 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
    bun run build
    ```
 
+5. Run database migrations:
+
+   ```bash
+   bun run migrate:up
+   ```
+
 ## Configuration
 
 ### Environment Variables
 
-| Variable           | Description                             | Required | Default |
-| ------------------ | --------------------------------------- | -------- | ------- |
-| `DISCORD_TOKEN`    | Your Discord bot token                  | Yes      | -       |
-| `CLIENT_ID`        | Your Discord application ID             | Yes      | -       |
-| `TOTAL_SHARDS`     | Number of shards (auto for automatic)   | No       | auto    |
-| `QUEST_CHANNEL_ID` | Default channel for quest announcements | No       | -       |
-| `DB_ALTER`         | Auto-update DB schema on startup (dev only) | No   | false   |
-| `NODE_ENV`         | Environment mode (development/production) | No    | production |
+| Variable           | Description                               | Required | Default    |
+| ------------------ | ----------------------------------------- | -------- | ---------- |
+| `DISCORD_TOKEN`    | Your Discord bot token                    | Yes      | -          |
+| `CLIENT_ID`        | Your Discord application ID               | Yes      | -          |
+| `TOTAL_SHARDS`     | Number of shards (auto for automatic)     | No       | auto       |
+| `QUEST_CHANNEL_ID` | Default channel for quest announcements   | No       | -          |
+| `NODE_ENV`         | Environment mode (development/production) | No       | production |
 
 ### Sharding
 
@@ -139,11 +144,33 @@ bun run type-check   # Run TypeScript type checking
 ├── config/          # Configuration files
 ├── constants/       # Application constants
 ├── handlers/        # Command and event handlers
+├── migrations/      # Database migration files
 ├── models/          # Sequelize database models
 ├── services/        # Business logic services
 ├── utils/           # Utility functions
 └── shardManager.ts  # Sharding manager entry point
 ```
+
+### Database Migrations
+
+This bot uses **Umzug** for proper database schema management. Migrations are:
+
+- ✅ **Version controlled** - All schema changes are tracked in git
+- ✅ **Explicit** - Each change is clearly defined in migration files
+- ✅ **Reversible** - Can rollback migrations if needed
+- ✅ **Production-safe** - No data loss or unexpected changes
+- ✅ **Automatic** - Runs on bot startup (only on shard 0)
+
+#### Migration Commands
+
+```bash
+bun run migrate:up       # Run all pending migrations
+bun run migrate:down     # Rollback the last migration
+bun run migrate:status   # Show migration status
+bun run migrate:create   # Show template for new migration
+```
+
+Migrations run automatically when the bot starts, but you can also run them manually for testing.
 
 ### Sharding Architecture
 

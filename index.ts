@@ -23,6 +23,7 @@ import PlayerInventory from "./models/PlayerInventory.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
 import { scheduleDailyReset } from "./services/scheduler.js";
 import { registerCommands, handleCommand, listCommands, PREFIX } from "./handlers/commandRouter.js";
+import { runMigrations } from "./migrate.js";
 import logger from "./utils/logger.js";
 import { createEmbed, EMBED_COLORS } from "./utils/embedBuilder.js";
 
@@ -96,17 +97,8 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
 
   // Only the first shard handles database initialization and scheduling
   if (shardId === 0) {
-    await sequelize.sync();
-    // Use alter mode only in development or when DB_ALTER env var is set
-    const shouldAlter = process.env.DB_ALTER === "true" || process.env.NODE_ENV === "development";
-    await Promise.all([
-      Quest.sync({ alter: shouldAlter }),
-      QuestProgress.sync({ alter: shouldAlter }),
-      Player.sync({ alter: shouldAlter }),
-      GuildSettings.sync({ alter: shouldAlter }),
-      Item.sync({ alter: shouldAlter }),
-      PlayerInventory.sync({ alter: shouldAlter }),
-    ]);
+    // Run migrations to ensure database schema is up to date
+    await runMigrations();
 
     const quest = await getActiveQuest();
     if (!quest || new Date() >= (quest as any).resetAt) {
