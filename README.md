@@ -168,6 +168,22 @@ bun run migrate:up       # Run all pending migrations
 bun run migrate:down     # Rollback the last migration
 bun run migrate:status   # Show migration status
 bun run migrate:create   # Show template for new migration
+bun run seed:shop        # Populate shop with initial items
+```
+
+#### First-time Setup
+
+After cloning the repository:
+
+```bash
+# Run migrations to create database tables
+bun run migrate:up
+
+# Seed the shop with items
+bun run seed:shop
+
+# Start the bot
+bun run dev:sharded
 ```
 
 Migrations run automatically when the bot starts, but you can also run them manually for testing.

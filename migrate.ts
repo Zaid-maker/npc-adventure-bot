@@ -14,6 +14,15 @@ const migrationLogger = logger.child("Migrations");
 export const umzug = new Umzug({
   migrations: {
     glob: ["migrations/*.js", { cwd: __dirname }],
+    resolve: ({ name, path, context }) => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const migration = require(path!);
+      return {
+        name,
+        up: async () => migration.up(context),
+        down: async () => migration.down(context),
+      };
+    },
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({

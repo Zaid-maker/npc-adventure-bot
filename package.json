@@ -17,7 +17,8 @@
     "migrate:up": "bun run migrate up",
     "migrate:down": "bun run migrate down",
     "migrate:status": "bun run migrate status",
-    "migrate:create": "bun run migrate create"
+    "migrate:create": "bun run migrate create",
+    "seed:shop": "bun seed-shop.ts"
   },
   "keywords": [],
   "author": "",
