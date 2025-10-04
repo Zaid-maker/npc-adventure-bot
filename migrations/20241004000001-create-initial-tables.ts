@@ -44,11 +44,6 @@ export async function up(queryInterface: QueryInterface) {
       autoIncrement: true,
       allowNull: false,
     },
-    questId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -57,25 +52,17 @@ export async function up(queryInterface: QueryInterface) {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    targetCount: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     rewardCoins: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    daily: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     resetAt: {
       type: DataTypes.DATE,
       allowNull: false,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
     },
     createdAt: {
       type: DataTypes.DATE,
