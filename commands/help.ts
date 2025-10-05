@@ -38,6 +38,14 @@ export default {
             "`!streakboard` — View the top streaks.",
         },
         {
+          name: "🎮 Fun & Games",
+          value:
+            "`!roll <dice>` — Roll dice (e.g., 1d20, 2d6).\n" +
+            "`!8ball <question>` — Ask the mystical orb.\n" +
+            "`!coinflip [side] [wager]` — Flip a coin, bet coins.\n" +
+            "`!rps <choice> [wager]` — Rock paper scissors vs NPC.",
+        },
+        {
           name: "💡 Other",
           value:
             "`!ping` — Check the bot's latency.\n" +

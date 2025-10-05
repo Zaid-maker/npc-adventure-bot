@@ -47,6 +47,10 @@ import setquestchannelCommand from "./commands/setquestchannel.js";
 import historyCommand from "./commands/history.js";
 import giveCommand from "./commands/give.js";
 import shardsCommand from "./commands/shards.js";
+import rollCommand from "./commands/roll.js";
+import eightBallCommand from "./commands/8ball.js";
+import coinFlipCommand from "./commands/coinflip.js";
+import rpsCommand from "./commands/rps.js";
 
 dotenv.config();
 
@@ -81,6 +85,10 @@ registerCommands([
   historyCommand,
   giveCommand,
   shardsCommand,
+  rollCommand,
+  eightBallCommand,
+  coinFlipCommand,
+  rpsCommand,
 ]);
 
 const slashCommands: APIApplicationCommand[] = listCommands()
