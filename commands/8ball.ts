@@ -127,7 +127,10 @@ export default {
     )
     .toJSON(),
 
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, options?: { args?: string[] }) {
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    options?: { args?: string[] },
+  ) {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
 

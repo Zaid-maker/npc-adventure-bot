@@ -151,7 +151,10 @@ export default {
     )
     .toJSON(),
 
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, options?: { args?: string[] }) {
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    options?: { args?: string[] },
+  ) {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
 
@@ -160,12 +163,8 @@ export default {
       const side = interaction.options.getString("side");
       const wager = interaction.options.getInteger("wager");
 
-      await executeCoinFlip(
-        interaction.user.id,
-        interaction.user.tag,
-        side,
-        wager,
-        (opts) => interaction.reply(opts),
+      await executeCoinFlip(interaction.user.id, interaction.user.tag, side, wager, (opts) =>
+        interaction.reply(opts),
       );
     } else {
       const message = messageOrInteraction as Message;
@@ -192,12 +191,8 @@ export default {
         }
       }
 
-      await executeCoinFlip(
-        message.author.id,
-        message.author.tag,
-        side,
-        wager,
-        (opts) => message.reply(opts),
+      await executeCoinFlip(message.author.id, message.author.tag, side, wager, (opts) =>
+        message.reply(opts),
       );
     }
   },

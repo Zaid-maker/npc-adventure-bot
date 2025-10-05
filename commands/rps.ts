@@ -134,7 +134,9 @@ async function executeRPS(
           `${resultText}\n\n` +
           `**Wager:** ${wager} coins\n` +
           `**Balance:** ${currentCoins} → **${newBalance}** coins\n` +
-          (result !== "tie" ? `**${result === "win" ? "Gained" : "Lost"}:** ${wager} coins` : "**No coins exchanged**"),
+          (result !== "tie"
+            ? `**${result === "win" ? "Gained" : "Lost"}:** ${wager} coins`
+            : "**No coins exchanged**"),
         footer: {
           text:
             result === "win"
@@ -206,11 +208,18 @@ export default {
         .setRequired(true),
     )
     .addIntegerOption((option) =>
-      option.setName("wager").setDescription("Amount of coins to bet").setMinValue(1).setRequired(false),
+      option
+        .setName("wager")
+        .setDescription("Amount of coins to bet")
+        .setMinValue(1)
+        .setRequired(false),
     )
     .toJSON(),
 
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, options?: { args?: string[] }) {
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    options?: { args?: string[] },
+  ) {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
 
@@ -219,12 +228,8 @@ export default {
       const choice = interaction.options.getString("choice", true);
       const wager = interaction.options.getInteger("wager");
 
-      await executeRPS(
-        interaction.user.id,
-        interaction.user.tag,
-        choice,
-        wager,
-        (opts) => interaction.reply(opts),
+      await executeRPS(interaction.user.id, interaction.user.tag, choice, wager, (opts) =>
+        interaction.reply(opts),
       );
     } else {
       const message = messageOrInteraction as Message;
@@ -262,12 +267,8 @@ export default {
         }
       }
 
-      await executeRPS(
-        message.author.id,
-        message.author.tag,
-        choice,
-        wager,
-        (opts) => message.reply(opts),
+      await executeRPS(message.author.id, message.author.tag, choice, wager, (opts) =>
+        message.reply(opts),
       );
     }
   },

@@ -56,7 +56,8 @@ async function executeRoll(
   // Choose appropriate emoji based on roll result
   let resultEmoji = "🎲";
   if (sides === 20) {
-    if (total === 20 * count) resultEmoji = "🎯"; // Natural 20(s)
+    if (total === 20 * count)
+      resultEmoji = "🎯"; // Natural 20(s)
     else if (total === count) resultEmoji = "💀"; // Natural 1(s)
   }
 
@@ -110,7 +111,10 @@ export default {
     )
     .toJSON(),
 
-  async execute(messageOrInteraction: Message | ChatInputCommandInteraction, options?: { args?: string[] }) {
+  async execute(
+    messageOrInteraction: Message | ChatInputCommandInteraction,
+    options?: { args?: string[] },
+  ) {
     const isInteraction =
       (messageOrInteraction as ChatInputCommandInteraction).isChatInputCommand?.() ?? false;
 
