@@ -43,13 +43,16 @@ A Discord bot for RPG-style quests and adventures, built with Discord.js and Typ
 
 ### Environment Variables
 
-| Variable           | Description                               | Required | Default    |
-| ------------------ | ----------------------------------------- | -------- | ---------- |
-| `DISCORD_TOKEN`    | Your Discord bot token                    | Yes      | -          |
-| `CLIENT_ID`        | Your Discord application ID               | Yes      | -          |
-| `TOTAL_SHARDS`     | Number of shards (auto for automatic)     | No       | auto       |
-| `QUEST_CHANNEL_ID` | Default channel for quest announcements   | No       | -          |
-| `NODE_ENV`         | Environment mode (development/production) | No       | production |
+| Variable           | Description                                  | Required | Default    |
+| ------------------ | -------------------------------------------- | -------- | ---------- |
+| `DISCORD_TOKEN`    | Your Discord bot token                       | Yes      | -          |
+| `CLIENT_ID`        | Your Discord application ID                  | Yes      | -          |
+| `BOT_OWNER`        | Discord user ID for bot owner (auto-funding) | No       | -          |
+| `TOTAL_SHARDS`     | Number of shards (auto for automatic)        | No       | auto       |
+| `QUEST_CHANNEL_ID` | Default channel for quest announcements      | No       | -          |
+| `NODE_ENV`         | Environment mode (development/production)    | No       | production |
+
+**Note:** If `BOT_OWNER` is set, that user will automatically receive 100,000 coins every 30 minutes for testing and administration purposes.
 
 ### Sharding
 

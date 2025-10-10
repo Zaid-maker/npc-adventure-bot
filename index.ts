@@ -21,7 +21,7 @@ import GuildSettings from "./models/GuildSettings.js";
 import Item from "./models/Item.js";
 import PlayerInventory from "./models/PlayerInventory.js";
 import { generateDailyQuest, getActiveQuest, trackQuestProgress } from "./services/questService.js";
-import { scheduleDailyReset } from "./services/scheduler.js";
+import { scheduleDailyReset, scheduleOwnerFunding } from "./services/scheduler.js";
 import { registerCommands, handleCommand, listCommands, PREFIX } from "./handlers/commandRouter.js";
 import { runMigrations } from "./migrate.js";
 import logger from "./utils/logger.js";
@@ -114,6 +114,7 @@ client.once(Events.ClientReady, async (readyClient: Client) => {
     }
 
     scheduleDailyReset(client);
+    scheduleOwnerFunding(); // Auto-fund bot owner every 30 minutes
   }
 
   // Set bot activity with rotation

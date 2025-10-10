@@ -44,9 +44,9 @@ export default {
     const guild = isInteraction ? messageOrInteraction.guild : messageOrInteraction.guild;
 
     // Check if user is bot owner
-    const ownerId = process.env.OWNER_ID;
+    const ownerId = process.env.BOT_OWNER;
     if (!ownerId) {
-      giveLogger.error("OWNER_ID not set in environment variables");
+      giveLogger.error("BOT_OWNER not set in environment variables");
       const embed = createCommandEmbed("give", {
         color: EMBED_COLORS.danger,
         title: "❌ Configuration Error",
